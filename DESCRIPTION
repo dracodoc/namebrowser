@@ -1,0 +1,22 @@
+Package: namebrowser
+Type: Package
+Title: Search Object Name in All Installed Packages
+Version: 0.1.0
+Author: Xianghui Dong
+Maintainer: Xianghui Dong <dracodoc@gmail.com>
+Description: Build object name table from all installed packages. Search names
+    in name table. After package and object name is selected, insert library
+    command before current line, run library command in console, replace
+    selected name or name around cursor with selected object name. Or replace
+    with package prefixed name without library command.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    devtools,
+    stringr,
+    data.table,
+    shiny,
+    miniUI,
+    DT
+RoxygenNote: 5.0.1
