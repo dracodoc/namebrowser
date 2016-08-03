@@ -1,12 +1,3 @@
-reduce_table <- function(){
-    data("name_table", envir = environment())
-    nt <- name_table[-1,]
-    rm(name_table)
-    name_table <- nt
-    p <- devtools::inst("namebrowser")
-    save(name_table, file = stringr::str_c(p, "\\data\\name_table.rda"))
-}
-
 #' Get path of installed_package_folder\\data\\
 #'
 #' Always load and save data to this folder to make sure only one version of
@@ -17,26 +8,84 @@ reduce_table <- function(){
 #'
 get_data_folder <- function(){
     package_folder <- devtools::inst("namebrowser")
-    data_folder <- stringr::str_c(p, "\\data\\")
+    data_folder <- stringr::str_c(package_folder, "\\data\\")
 }
 
-#' Build name table
+
+#' Update name table
 #'
-#' All object names in all installed packages are scanned with
+#' Update name table by package name changes, or by changes both in name and
+#' version.
+#'
+#' Use \code{.packages(all.available = TRUE)} for name changes,
+#' \code{installed.packages} for name and version changes but slower.
+#'
+#' In one case, \code{.packages(all.available = TRUE)} found 408 packages
+#' folder, \code{installed.packages} found 379 packages with valid DESCRIPTION
+#' file, the final loading, attaching, listing names function found 267 packages
+#' with at least one name.
+#'
+#' @param withVersion If TRUE, update name table by changes both in name and
+#'   version version
+#'
+#' @export
+#'
+update_name_table <- function(withVersion = FALSE){
+    # load previous data ----
+    data("all_packages_versioned", envir = environment())
+    data("name_table", envir = environment())
+    if (withVersion) { # build update list by name only
+
+
+    } else {# build update list by name and version
+
+    }
+    # read current list without version
+    current_all_packages <- .packages(all.available = TRUE)
+    # read current list with version ----
+    # set noCache to benchmark, 800 ms mean for 379 libraries
+    current_all_packages_versioned <- installed.packages(priority = "NA",
+                                                         noCache = TRUE)
+    current_all_packages_versioned <- data.table(current_all_packages_versioned)
+    dropped_columns <- c("Priority", "License", "License_is_FOSS",
+                         "License_restricts_use", "OS_type", "MD5sum",
+                         "NeedsCompilation")
+    current_all_packages_versioned[, (dropped_columns) := NULL]
+    # build list of package to be updated, include previous empty response packages, inquiry and build table, replace cooresponding part of old data
+
+
+    save(all_packages_versioned,
+         file = stringr::str_c(get_data_folder(),
+                              "all_packages_versioned.rda"))
+    # build a package update table ------
+}
+
+#' Build name table for selected packages
+#'
+#' All object names in packages are scanned with
 #' \code{ls(\"package:pkgname\")}.
 #'
 #' Functions, datasets, operators, symbols, alternative formats like
 #' \code{body()<-} are included from \code{ls()}. Package must be loaded and
-#' attached first before using \code{ls()}. Thus all installed packages are
+#' attached first before using \code{ls()}. Thus all available packages are
 #' loaded and attached in the scanning process. Although extra efforts were made
 #' to unload packages properly after use, there still will be some left over
 #' when the scan finished. It's recommended to build index in a new R session
 #' instead of working session with important data, and restart R session after
 #' building.
 #'
-#' @export
+#' @param package_list packages to be scanned
 #'
-build_index <- function(){
+scan_names <- function(package_list){
+    # TODO also need to save the list of packages that cannot load back to package table, next time even if the package name or version doesn't change, it may become usable.
+    # load previous data ----
+    data("name_table", envir = environment())
+    # compare package table date, if too old, update with function
+
+    # build list of package to be updated, include previous empty response packages, inquiry and build table, replace cooresponding part of old data
+    # two standard: either by package name or by package version
+
+    # save every data set
     sl_0 <- .packages() # search list
     ns_0 <- loadedNamespaces()
     all_packages <- .packages(all.available = TRUE)
