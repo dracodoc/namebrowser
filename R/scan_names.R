@@ -49,17 +49,23 @@ pkg_name_changed <- function(){
 #'
 pkg_name_version_changed <- function(){
     data("pkg_table", envir = environment())
-    pkg_table_now <- data.table(installed.packages(priority = "NA"))
+    pkg_table_now <- data.table::data.table(installed.packages(priority = "NA"))
     pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
     # make some changes for development test
-    # TODO remove later
+    # TODO remove later, change rows, also change version numbers
     pkg_table <- pkg_table[6:379, ]
     pkg_table_now <- pkg_table_now[1:372,]
+    pkg_table[5, Version := "3.2"]
     # TODO remove above later
-
-
-    #actually only save when previous version and current version are compared and used. a data.table
+    # Version is character
+    data.table::setkey(pkg_table, Package, Version)
+    data.table::setkey(pkg_table_now, Package, Version)
+    pkg_to_remove <- pkg_table[!pkg_table_now][, Package]
+    pkg_to_add <- pkg_table_now[!pkg_table][, Package]
+    # pkg table sync to current version
+    pkg_table <- pkg_table_now
     save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
+    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
 }
 
 #' Update name table
@@ -81,10 +87,14 @@ update_name_table <- function(withVersion = FALSE){
     # get pkg update list ----
     if (withVersion) {
 
+        cat("Packages name and version changes:\n")
     } else {
-
+        cat("Packages name changes:\n")
     }
+    # print changes to console
+
     # update names by list ----
+
 
     # read previous data, merge, discard, save
     data("name_table", envir = environment())
