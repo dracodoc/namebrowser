@@ -31,7 +31,7 @@ pkg_name_changed <- function(){
   # TODO remove above
   pkg_to_add <- pkg_list_now[!pkg_list_now %in% pkg_list]
   pkg_to_remove <- pkg_list[!pkg_list %in% pkg_list_now]
-  # name list synced to current version, use changes list to sync names too
+  #sync name list  to current version, use change list to sync names too
   pkg_list <- pkg_list_now
   save(pkg_list, file = stringr::str_c(get_data_folder(), "pkg_list.rda"))
   list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
@@ -62,7 +62,7 @@ pkg_name_version_changed <- function(){
   data.table::setkey(pkg_table_now, Package, Version)
   pkg_to_remove <- pkg_table[!pkg_table_now][, Package]
   pkg_to_add <- pkg_table_now[!pkg_table][, Package]
-  # pkg table sync to current version
+  #sync pkg table  to current version ------
   pkg_table <- pkg_table_now
   save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
   list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
@@ -84,20 +84,23 @@ pkg_name_version_changed <- function(){
 #' @export
 #'
 update_name_table <- function(withVersion = FALSE){
-  # get pkg update list ----
+  # get pkg update list ------
   if (withVersion) {
-
-      cat("Packages name and version changes:\n")
+    pkg_updates <- pkg_name_version_changed()
+    cat("Packages name and version changes:\n")
   } else {
-      cat("Packages name changes:\n")
+    pkg_updates <- pkg_name_changed()
+    cat("Packages name changes:\n")
   }
   # print changes to console
+  pkg_updates
+  # update names by list ------
+  name_table_updates <- scan_names(pkg_updates$pkg_to_add)
 
-  # update names by list ----
-
-
-  # read previous data, merge, discard, save
+  # read previous data, merge, discard, setkey, save ------
   data("name_table", envir = environment())
+  # names to be kept. No direct way to remove rows in data.table, select keeper
+  name_table_keep <- name_table[!package %in% pkg_updates$pkg_to_remove,]
 
 
 
@@ -120,61 +123,50 @@ update_name_table <- function(withVersion = FALSE){
 #' @param package_list packages to be scanned
 #'
 scan_names <- function(package_list){
-    # TODO also need to save the list of packages that cannot load back to package table, next time even if the package name or version doesn't change, it may become usable.
-    # load previous data ----
-    data("name_table", envir = environment())
-    # compare package table date, if too old, update with function
-
-    # build list of package to be updated, include previous empty response packages, inquiry and build table, replace cooresponding part of old data
-    # two standard: either by package name or by package version
-
-    # save every data set
-    sl_0 <- .packages() # search list
-    ns_0 <- loadedNamespaces()
-    all_packages <- .packages(all.available = TRUE)
-    name_list <- vector("list", length(all_packages))
-    # prepare all to utilize vectorization. note some function need prefixed version, some do not
-    all_packages_prefixed <- str_c("package:", all_packages)
-    error_packages <- character(length(all_packages))
-    for (i in seq_along(all_packages)) {
-        if (suppressPackageStartupMessages(require(all_packages[i],
-                                                   character.only = TRUE,
-                                                   quietly = TRUE))) {
-            name_list[[i]] <- ls(all_packages_prefixed[i])
-            cat(paste0(all_packages[i], "\n"))
-            # cannot unload base list, use package string to match format
-            if (!all_packages[i] %in% sl_0) {
-                try(unloadNamespace(all_packages[i])) # some still cannot be unloaded
-            }
-        } else{
-            error_packages[i] <- all_packages[i]
-        }
+  # initial loaded packages need to be protected from the clean up process
+  searchlist_0 <- .packages()
+  namespace_0 <- loadedNamespaces()
+  name_list <- vector("list", length(package_list))
+  # some functions need prefix, some do not
+  package_list_prefixed <- stringr::str_c("package:", package_list)
+  error_packages <- character(length(package_list))
+  for (i in seq_along(package_list)) {
+    if (suppressPackageStartupMessages(require(package_list[i],
+                                               character.only = TRUE,
+                                               quietly = TRUE))) {
+      name_list[[i]] <- ls(package_list_prefixed[i])
+      cat(paste0("Scanned ", package_list[i], "\n"))
+      # unload package if not in initial environment
+      if (!package_list[i] %in% searchlist_0) {
+        # some cannot be unloaded because of order, dependency etc
+        try(unloadNamespace(package_list[i]))
+      }
+    } else{# packages cannot be loaded properly
+      error_packages[i] <- package_list[i]
     }
-    error_packages <- error_packages[error_packages != ""]
-    # ns_1 <- loadedNamespaces()
-    # changes <- str_sub(state_1[!state_1 %in% state_0], start = 9)# doesn't need the package: prefix
-    ns_changes <- ns_1[!ns_1 %in% ns_0]
-    #try(lapply(map_chr(ns_changes, devtools::inst), devtools::unload))
-    sl_0[order(sl_0)]
-    sl_1 <- .packages()
-    sl_1[order(sl_1)]
-    ns_0[order(ns_0)]
-    ns_2 <- loadedNamespaces()
-    ns_2[order(ns_2)]
-    proc.time() - ptm
-    save(all_packages, file = "all_packages.Rdata")
-    save(name_list, file = "name_list.Rdata")
-
-    name_table_list <- vector("list", length(name_list))
-    for (i in seq_along(name_list)) {
-        if (!is.null(name_list[[i]]) &&
-            !identical(name_list[[i]], character(0))) {
-            #print(i)
-            name_table_current <- data.table(package = all_packages[i],
-                                             obj_name = name_list[[i]])
-            name_table_list[[i]] <- name_table_current
-        }
+  }
+  #error_packages <- error_packages[error_packages != ""]
+  # tried to restore initial environment, now restart R session instead
+  #ns_1 <- loadedNamespaces()
+  #ns_changes <- ns_1[!ns_1 %in% namespace_0]
+  #try(lapply(map_chr(ns_changes, devtools::inst), devtools::unload))
+  # compare changes of namespace
+  # searchlist_0[order(searchlist_0)]
+  # sl_1 <- .packages()
+  # sl_1[order(sl_1)]
+  # namespace_0[order(namespace_0)]
+  # ns_2 <- loadedNamespaces()
+  # ns_2[order(ns_2)]
+  #proc.time() - ptm
+  # convert nested name list into data table ------
+  name_table_list <- vector("list", length(name_list))
+  for (i in seq_along(name_list)) {
+    if (!is.null(name_list[[i]]) && !identical(name_list[[i]], character(0))) {
+      #print(i)
+      name_table_current <- data.table(package = package_list[i],
+                                       obj_name = name_list[[i]])
+      name_table_list[[i]] <- name_table_current
     }
-    name_table <- rbindlist(name_table_list)
-    # TODO return table
+  }
+  rbindlist(name_table_list)
 }
