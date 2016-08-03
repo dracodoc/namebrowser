@@ -51,7 +51,11 @@ pkg_name_version_changed <- function(){
     data("pkg_table", envir = environment())
     pkg_table_now <- data.table(installed.packages(priority = "NA"))
     pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
-
+    # make some changes for development test
+    # TODO remove later
+    pkg_table <- pkg_table[6:379, ]
+    pkg_table_now <- pkg_table_now[1:372,]
+    # TODO remove above later
 
 
     #actually only save when previous version and current version are compared and used. a data.table
