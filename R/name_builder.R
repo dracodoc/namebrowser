@@ -4,11 +4,12 @@
 #' data exist
 #'
 #' @return installed_package_folder\\data\\
+#' @import stringr
 #' @export
 #'
 get_data_folder <- function(){
   package_folder <- devtools::inst("namebrowser")
-  data_folder <- stringr::str_c(package_folder, "\\data\\")
+  data_folder <- str_c(package_folder, "\\data\\")
 }
 
 #' Scan package changes by name only
@@ -23,6 +24,7 @@ get_data_folder <- function(){
 #'   scratch.
 #'
 #' @return list(pkg_to_add, pkg_to_remove)
+#' @import stringr
 #' @export
 #'
 pkg_name_changed <- function(startNew = FALSE){
@@ -30,21 +32,21 @@ pkg_name_changed <- function(startNew = FALSE){
     pkg_list <- .packages(all.available = TRUE)
     pkg_to_add <- pkg_list
     pkg_to_remove <- NULL
-    save(pkg_list, file = stringr::str_c(get_data_folder(), "pkg_list.rda"))
+    save(pkg_list, file = str_c(get_data_folder(), "pkg_list.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   } else{
     data("pkg_list", envir = environment())
     pkg_list_now <- .packages(all.available = TRUE)
     # make some changes in both list in development to simulate changes.
     # TODO remove after passed
-    # pkg_list <- pkg_list[-(1:5)]
-    # pkg_list_now <- pkg_list_now[-(8:12)]
+    pkg_list <- pkg_list[-(1:5)]
+    pkg_list_now <- pkg_list_now[-(8:12)]
     # TODO remove above
     pkg_to_add <- pkg_list_now[!pkg_list_now %in% pkg_list]
     pkg_to_remove <- pkg_list[!pkg_list %in% pkg_list_now]
     #sync name list  to current version, use change list to sync names too
     pkg_list <- pkg_list_now
-    save(pkg_list, file = stringr::str_c(get_data_folder(), "pkg_list.rda"))
+    save(pkg_list, file = str_c(get_data_folder(), "pkg_list.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   }
 
@@ -62,35 +64,36 @@ pkg_name_changed <- function(startNew = FALSE){
 #'   scratch.
 #'
 #' @return list(pkg_to_add, pkg_to_remove)
+#' @import data.table stringr
 #' @export
 #'
 pkg_name_version_changed <- function(startNew = FALSE){
-  if (startNew){
-    pkg_table <- data.table::data.table(installed.packages(priority = "NA"))
+  if (startNew) {
+    pkg_table <- data.table(installed.packages(priority = "NA"))
     pkg_table <- pkg_table[, .(Package, LibPath, Version)]
-    data.table::setkey(pkg_table, Package, Version)
+    setkey(pkg_table, Package, Version)
     pkg_to_add <- pkg_table[, Package]
     pkg_to_remove <- NULL
-    save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
+    save(pkg_table, file = str_c(get_data_folder(), "pkg_table.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   } else{
     data("pkg_table", envir = environment())
-    pkg_table_now <- data.table::data.table(installed.packages(priority = "NA"))
-    pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
+    pkg_table_now <- data.table(installed.packages(priority = "NA"))
+    pkg_table_now <- pkg_table_now[, list(Package, LibPath, Version)]
     # make some changes for development test
     # TODO remove later, change rows, also change version numbers
-    # pkg_table <- pkg_table[6:379, ]
-    # pkg_table_now <- pkg_table_now[1:372,]
-    # pkg_table[5, Version := "3.2"]
+    pkg_table <- pkg_table[6:379, ]
+    pkg_table_now <- pkg_table_now[1:372,]
+    pkg_table[5, Version := "3.2"]
     # TODO remove above later
     # Version is character
-    data.table::setkey(pkg_table, Package, Version)
-    data.table::setkey(pkg_table_now, Package, Version)
+    setkey(pkg_table, Package, Version)
+    setkey(pkg_table_now, Package, Version)
     pkg_to_remove <- pkg_table[!pkg_table_now][, Package]
     pkg_to_add <- pkg_table_now[!pkg_table][, Package]
     #sync pkg table  to current version ------
     pkg_table <- pkg_table_now
-    save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
+    save(pkg_table, file = str_c(get_data_folder(), "pkg_table.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   }
 }
@@ -115,29 +118,29 @@ pkg_name_version_changed <- function(startNew = FALSE){
 #' @param startNew  Default FALSE, compare user's environment with name table
 #'   shipped with this package, only update difference. If True, build from
 #'   scratch.
-#'
+#' @import data.table stringr
 #' @export
 #'
 update_name_table <- function(withVersion = FALSE, startNew = FALSE){
   # get pkg update list ------
   if (withVersion) {
     pkg_updates <- pkg_name_version_changed(startNew)
-    cat("Packages name and version changes:\n")
+    cat("-- Packages name and version changes:\n")
   } else {
     pkg_updates <- pkg_name_changed(startNew)
-    cat("Packages name changes:\n")
+    cat("-- Packages name changes:\n")
   }
   # print changes to console
-  pkg_updates
+  print(pkg_updates)
   # update names by list ------
   name_table_updates <- scan_names(pkg_updates$pkg_to_add)
-  data.table::setkey(name_table_updates, package, obj_name)
+  setkey(name_table_updates, package, obj_name)
   # read previous data, merge, discard, setkey, save ------
   data("name_table", envir = environment())
   # names to be kept. No direct way to remove rows in data.table, select keeper
   name_table_keep <- name_table[!package %in% pkg_updates$pkg_to_remove,]
   name_table <- rbind(name_table_keep, name_table_updates)
-  save(name_table, file = stringr::str_c(get_data_folder(), "name_table.rda"))
+  save(name_table, file = str_c(get_data_folder(), "name_table.rda"))
 }
 
 #' Build name table for selected packages
@@ -155,6 +158,7 @@ update_name_table <- function(withVersion = FALSE, startNew = FALSE){
 #' building.
 #'
 #' @param package_list packages to be scanned
+#' @import stringr data.table
 #' @return name_table name table of scanned packages
 #'
 scan_names <- function(package_list){
@@ -163,14 +167,14 @@ scan_names <- function(package_list){
   namespace_0 <- loadedNamespaces()
   name_list <- vector("list", length(package_list))
   # some functions need prefix, some do not
-  package_list_prefixed <- stringr::str_c("package:", package_list)
+  package_list_prefixed <- str_c("package:", package_list)
   error_packages <- character(length(package_list))
   for (i in seq_along(package_list)) {
     if (suppressPackageStartupMessages(require(package_list[i],
                                                character.only = TRUE,
                                                quietly = TRUE))) {
       name_list[[i]] <- ls(package_list_prefixed[i])
-      cat(paste0("Scanned ", package_list[i], "\n"))
+      cat(paste0("    Scanned ", package_list[i], "\n"))
       # unload package if not in initial environment
       if (!package_list[i] %in% searchlist_0) {
         # some cannot be unloaded because of order, dependency etc
@@ -180,7 +184,8 @@ scan_names <- function(package_list){
       error_packages[i] <- package_list[i]
     }
   }
-  print(error_packages)
+  cat("-- Packages that have problem loading:\n")
+  print(error_packages[error_packages != ""]) # initialized with ""
   # convert nested name list into data table ------
   name_table_list <- vector("list", length(name_list))
   for (i in seq_along(name_list)) {
