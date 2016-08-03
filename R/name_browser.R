@@ -9,15 +9,16 @@
 #' replace text selected or name around cursor with selected object name
 #' prefixed by object name.
 #'
-#' @param search_regex Whether to use regular expression in search. Dialog title
-#'   will be updated to show regex mode. Regex matchs may not be highlighted.
+#' @param search_regex Whether to use regular expression in search. Default
+#'   FALSE to use normal search. Dialog title will be updated to show regex
+#'   mode.
 #'
 #' @export
 #'
 searchname <- function(search_regex = FALSE) {
     data("name_table", envir = environment())
     # get input ----------
-    context <- rstudioapi::getSourceEditorContext()
+    context <- rstudioapi::getActiveDocumentContext()
     selection_start <- context$selection[[1]]$range$start
     selection_end <- context$selection[[1]]$range$end
     current_line <- context$content[selection_start["row"]]
@@ -124,6 +125,14 @@ searchname <- function(search_regex = FALSE) {
     shiny::runGadget(ui, server, viewer = shiny::dialogViewer("Name browser"))
 }
 
-searchnames_regex <- function(){
-    searchnames(search_regex = TRUE)
+#' Regex seach name in name table
+#'
+#' Helper function to call \code{searchname} with regex enabled.
+#'
+#' Need this because RStudio Addin currently don't support function with
+#' parameters
+#' @export
+#'
+searchname_regex <- function(){
+    searchname(search_regex = TRUE)
 }

@@ -7,8 +7,9 @@
 searchname(search_regex = FALSE)
 }
 \arguments{
-\item{search_regex}{Whether to use regular expression in search. Dialog title
-will be updated to show regex mode. Regex matchs may not be highlighted.}
+\item{search_regex}{Whether to use regular expression in search. Default
+FALSE to use normal search. Dialog title will be updated to show regex
+mode.}
 }
 \description{
 With text selected or name around cursor as initial search term, find the

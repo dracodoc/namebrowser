@@ -3,3 +3,4 @@
 export(build_index)
 export(get_data_folder)
 export(searchname)
+export(searchname_regex)
