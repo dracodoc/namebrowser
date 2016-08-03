@@ -34,36 +34,42 @@ update_name_table <- function(withVersion = FALSE){
     # load previous data ----
     data("all_packages_versioned", envir = environment())
     data("name_table", envir = environment())
-    if (withVersion) { # build update list by name only
+    if (withVersion) { # build update list by name and version
+        pkg_table_now <- data.table(installed.packages(priority = "NA"))
+        pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
 
+
+
+        #actually only save when previous version and current version are compared and used. a data.table
+        save(pkg_table_now,
+             file = stringr::str_c(get_data_folder(),
+                                  "pkg_table.rda"))
+    } else {# build update list by name only
         # scan names by update list
-
+        pkg_list_now <- .packages(all.available = TRUE)
         # merge updates and old data, remove to be removed, in function
 
-        # save data
-    } else {# build update list by name and version
-
+        # save data, a character vector
+        save(pkg_list_now,
+             file = stringr::str_c(get_data_folder(),
+                                   "pkg_list.rda"))
     }
     # read current list without version
-    current_all_packages <- .packages(all.available = TRUE)
+
     # read current list with version ----
     # set noCache to benchmark, 800 ms mean for 379 libraries
-    current_all_packages_versioned <- installed.packages(priority = "NA",
-                                                         noCache = TRUE)
-    current_all_packages_versioned <- data.table(current_all_packages_versioned)[, .(Package, LibPath, Version)]
+
     # build list of package to be updated, include previous empty response packages, inquiry and build table, replace cooresponding part of old data
 
 
-    save(all_packages_versioned,
-         file = stringr::str_c(get_data_folder(),
-                              "all_packages_versioned.rda"))
+
     # build a package update table ------
 }
 
 #' Build name table for selected packages
 #'
 #' All object names in packages are scanned with
-#' \code{ls(\"package:pkgname\")}.
+#' \code{ls("package:pkgname")}.
 #'
 #' Functions, datasets, operators, symbols, alternative formats like
 #' \code{body()<-} are included from \code{ls()}. Package must be loaded and

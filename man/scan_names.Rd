@@ -11,7 +11,7 @@ scan_names(package_list)
 }
 \description{
 All object names in packages are scanned with
-\code{ls(\"package:pkgname\")}.
+\code{ls("package:pkgname")}.
 }
 \details{
 Functions, datasets, operators, symbols, alternative formats like
