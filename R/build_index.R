@@ -1,3 +1,25 @@
+reduce_table <- function(){
+    data("name_table", envir = environment())
+    nt <- name_table[-1,]
+    rm(name_table)
+    name_table <- nt
+    p <- devtools::inst("namebrowser")
+    save(name_table, file = stringr::str_c(p, "\\data\\name_table.rda"))
+}
+
+#' Get path of installed_package_folder\\data\\
+#'
+#' Always load and save data to this folder to make sure only one version of
+#' data exist
+#'
+#' @return installed_package_folder\\data\\
+#' @export
+#'
+get_data_folder <- function(){
+    package_folder <- devtools::inst("namebrowser")
+    data_folder <- stringr::str_c(p, "\\data\\")
+}
+
 #' Build name table
 #'
 #' All object names in all installed packages are scanned with

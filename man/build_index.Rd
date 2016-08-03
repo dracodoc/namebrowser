@@ -2,20 +2,22 @@
 % Please edit documentation in R/build_index.R
 \name{build_index}
 \alias{build_index}
-\title{Build name table of all object names in all installed packages}
+\title{Build name table}
 \usage{
 build_index()
 }
 \description{
-Object names come from \code{ls(package:pkgname)}, include functions,
-datasets, operators etc.
+All object names in all installed packages are scanned with
+\code{ls(\"package:pkgname\")}.
 }
 \details{
-Some symbols are listed, some alternative formats like \code{body()<-} are
-listed. Before using \code{ls()}, package must be loaded and attached.
-Although extra efforts were made to unload packages properly after use, there
-still will be some left over when the scan finished. It's recommended to
-build index in a new R session instead of working session with important
-data, and restart R session after building.
+Functions, datasets, operators, symbols, alternative formats like
+\code{body()<-} are included from \code{ls()}. Package must be loaded and
+attached first before using \code{ls()}. Thus all installed packages are
+loaded and attached in the scanning process. Although extra efforts were made
+to unload packages properly after use, there still will be some left over
+when the scan finished. It's recommended to build index in a new R session
+instead of working session with important data, and restart R session after
+building.
 }
 

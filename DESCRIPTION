@@ -11,7 +11,7 @@ Description: Build object name table from all installed packages. Search names
     with package prefixed name without library command.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
+LazyData: FALSE
 Imports:
     devtools,
     stringr,
