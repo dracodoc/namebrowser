@@ -36,7 +36,11 @@ update_name_table <- function(withVersion = FALSE){
     data("name_table", envir = environment())
     if (withVersion) { # build update list by name only
 
+        # scan names by update list
 
+        # merge updates and old data, remove to be removed, in function
+
+        # save data
     } else {# build update list by name and version
 
     }
@@ -46,11 +50,7 @@ update_name_table <- function(withVersion = FALSE){
     # set noCache to benchmark, 800 ms mean for 379 libraries
     current_all_packages_versioned <- installed.packages(priority = "NA",
                                                          noCache = TRUE)
-    current_all_packages_versioned <- data.table(current_all_packages_versioned)
-    dropped_columns <- c("Priority", "License", "License_is_FOSS",
-                         "License_restricts_use", "OS_type", "MD5sum",
-                         "NeedsCompilation")
-    current_all_packages_versioned[, (dropped_columns) := NULL]
+    current_all_packages_versioned <- data.table(current_all_packages_versioned)[, .(Package, LibPath, Version)]
     # build list of package to be updated, include previous empty response packages, inquiry and build table, replace cooresponding part of old data
 
 
@@ -133,6 +133,5 @@ scan_names <- function(package_list){
         }
     }
     name_table <- rbindlist(name_table_list)
-    setkey(name_table, "obj_name")
-    save(name_table, file = "name_table.Rdata")
+    # TODO return table
 }
