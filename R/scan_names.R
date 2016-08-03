@@ -11,14 +11,54 @@ get_data_folder <- function(){
     data_folder <- stringr::str_c(package_folder, "\\data\\")
 }
 
+#' Scan package changes by name only
+#'
+#' Compare currently packages name with previous list \code{pkg_list}.
+#'
+#' Use \code{.packages(all.available = TRUE)} to check folder under library
+#' location path \code{lib.loc}. Has more false positives but fast.
+#'
+#' @return list(pkg_to_add, pkg_to_remove)
+#' @export
+#'
+pkg_name_changed <- function(){
+    # scan names by update list
+    pkg_list_now <- .packages(all.available = TRUE)
+    # merge updates and old data, remove to be removed, in function
+
+    # save data, a character vector
+    save(pkg_list_now,
+         file = stringr::str_c(get_data_folder(),
+                               "pkg_list.rda"))
+}
+
+#' Scan package changes by name and version
+#'
+#' Compare current packages name and version with previous table
+#' \code{pkg_table}.
+#'
+#' Use \code{installed.packages} to check DESCRIPTION file for each package folder, more accurate but slower than checking name only.
+#'
+#' @return list(pkg_to_add, pkg_to_remove)
+#' @export
+#'
+pkg_name_version_changed <- function(){
+    data("all_packages_versioned", envir = environment())
+    pkg_table_now <- data.table(installed.packages(priority = "NA"))
+    pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
+
+
+
+    #actually only save when previous version and current version are compared and used. a data.table
+    save(pkg_table_now,
+         file = stringr::str_c(get_data_folder(),
+                               "pkg_table.rda"))
+}
 
 #' Update name table
 #'
 #' Update name table by package name changes, or by changes both in name and
 #' version.
-#'
-#' Use \code{.packages(all.available = TRUE)} for name changes,
-#' \code{installed.packages} for name and version changes but slower.
 #'
 #' In one case, \code{.packages(all.available = TRUE)} found 408 packages
 #' folder, \code{installed.packages} found 379 packages with valid DESCRIPTION
@@ -31,39 +71,19 @@ get_data_folder <- function(){
 #' @export
 #'
 update_name_table <- function(withVersion = FALSE){
-    # load previous data ----
-    data("all_packages_versioned", envir = environment())
-    data("name_table", envir = environment())
-    if (withVersion) { # build update list by name and version
-        pkg_table_now <- data.table(installed.packages(priority = "NA"))
-        pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
+    # get pkg update list ----
+    if (withVersion) {
 
+    } else {
 
-
-        #actually only save when previous version and current version are compared and used. a data.table
-        save(pkg_table_now,
-             file = stringr::str_c(get_data_folder(),
-                                  "pkg_table.rda"))
-    } else {# build update list by name only
-        # scan names by update list
-        pkg_list_now <- .packages(all.available = TRUE)
-        # merge updates and old data, remove to be removed, in function
-
-        # save data, a character vector
-        save(pkg_list_now,
-             file = stringr::str_c(get_data_folder(),
-                                   "pkg_list.rda"))
     }
-    # read current list without version
+    # update names by list ----
 
-    # read current list with version ----
-    # set noCache to benchmark, 800 ms mean for 379 libraries
-
-    # build list of package to be updated, include previous empty response packages, inquiry and build table, replace cooresponding part of old data
+    # read previous data, merge, discard, save
+    data("name_table", envir = environment())
 
 
 
-    # build a package update table ------
 }
 
 #' Build name table for selected packages
