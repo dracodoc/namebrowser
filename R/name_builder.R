@@ -1,130 +1,195 @@
-#' Seach name in name table
+#' Get path of installed_package_folder\\data\\
 #'
-#' With text selected or name around cursor as initial search term, find the
-#' package and object name you need.
+#' Always load and save data to this folder to make sure only one version of
+#' data exist
 #'
-#' \code{Load Package} button run \code{library(package)} in console, insert
-#' \code{library(package)} before current line, replace text selected or name
-#' around cursor with selected object name. \code{Insert Package Prefix} button
-#' replace text selected or name around cursor with selected object name
-#' prefixed by object name.
-#'
-#' @param search_regex Whether to use regular expression in search. Default
-#'   FALSE to use normal search. Dialog title will be updated to show regex
-#'   mode.
-#'
+#' @return installed_package_folder\\data\\
 #' @export
 #'
-searchname <- function(search_regex = FALSE) {
-  data("name_table", envir = environment())
-  # get input ----------
-  context <- rstudioapi::getActiveDocumentContext()
-  selection_start <- context$selection[[1]]$range$start
-  selection_end <- context$selection[[1]]$range$end
-  current_line <- context$content[selection_start["row"]]
-  indent <- stringr::str_match(current_line, "^\\s*")
-  current_line_range <- context$selection[[1]]$range
-  current_line_range$start["column"] <- 1
-  current_line_range$end["column"] <- nchar(current_line) + 1 # full range end at length+1
-  if (any(selection_start != selection_end)) { # text selected
-    input_name <- context$selection[[1]]$text
-    # range to be replaced
-    left_edge <- selection_start["column"] - 1
-    right_edge <- selection_end["column"]
-  } else {# no text select, infer input name
-    # search left side of cursor for last partial word
-    left_side <- stringr::str_sub(current_line,
-                                  start = 1,
-                                  end = selection_start["column"] - 1)
-    first_word_char_till_end <- "[^\\w](\\w*)$"
-    left_partial_word <- stringr::str_match(left_side,
-                                        first_word_char_till_end)[2]
-    left_edge <- stringr::str_locate(left_side,
-                                     first_word_char_till_end)[1]
-    # right side for first partial word
-    right_side <- stringr::str_sub(current_line,
-                          start = selection_start["column"],
-                          end = nchar(current_line))
-    start_till_last_word_char <- "^\\w*"
-    right_partial_word <- stringr::str_extract(right_side,
-                                              start_till_last_word_char)
-    right_edge <- stringr::str_locate(right_side,
-                                      start_till_last_word_char)[2] +
-                    selection_end["column"] # index offset from cursor
-    input_name <- stringr::str_c(left_partial_word, right_partial_word)
-  }
-  # build UI ------
-  title <- ifelse(search_regex,
-                  "Regex search name in all packages",
-                  "Search name in all packages")
-  ui <- miniUI::miniPage(
-          miniUI::gadgetTitleBar(title,
-              right = miniUI::miniTitleBarButton("load_package",
-                                 "Load Package", primary = TRUE)),
-          miniUI::miniContentPanel(DT::dataTableOutput("table")),
-          miniUI::miniButtonBlock(shiny::actionButton("insert_prefix",
-                                  shiny::strong("Insert Package Prefix")))
-        )
-  # build server -----
-  server <- function(input, output, session) {
-    # Define reactive expressions, outputs, etc.
-    output$table <- DT::renderDataTable(name_table,
-                                        server = TRUE,
-                                        selection = "single",
-                                        filter = 'top',
-                                        options = list(
-                                          searchHighlight = TRUE,
-                                          search = list(search = input_name,
-                                                        regex = search_regex),
-                                          pageLength = 7
-                                        )
-    )
-    # insert library line, run library in console, replace current line
-    shiny::observeEvent(input$load_package, {
-      if (!is.null(input$table_rows_selected)) {
-        row_selected <- input$table_rows_selected
-        lib_line <- stringr::str_c("library(",
-                                   name_table[row_selected, "package"], ")")
-        new_line <- stringr::str_c(
-                        stringr::str_sub(current_line, 1, left_edge),
-                        name_table[row_selected, "obj_name"],
-                        stringr::str_sub(current_line, right_edge,
-                                  nchar(current_line)))
-        rstudioapi::sendToConsole(lib_line, execute = TRUE)
-        new_2_lines <- stringr::str_c(indent, lib_line, "\n", new_line)
-        rstudioapi::insertText(current_line_range, new_2_lines, id = context$id)
-        shiny::stopApp()
-      }
-    })
-    # replace current line input name with full prefixed name
-    shiny::observeEvent(input$insert_prefix, {
-      if (!is.null(input$table_rows_selected)) {
-        row_selected <- input$table_rows_selected
-        prefixed_name <- stringr::str_c(
-                             name_table[row_selected, "package"],
-                             "::",
-                             name_table[row_selected, "obj_name"])
-        new_line <- stringr::str_c(
-                        stringr::str_sub(current_line, 1, left_edge),
-                          prefixed_name,
-                          stringr::str_sub(current_line, right_edge,
-                                  nchar(current_line)))
-        rstudioapi::insertText(current_line_range, new_line, id = context$id)
-        shiny::stopApp()
-      }
-    })
-  }
-  shiny::runGadget(ui, server, viewer = shiny::dialogViewer("Name browser"))
+get_data_folder <- function(){
+  package_folder <- devtools::inst("namebrowser")
+  data_folder <- stringr::str_c(package_folder, "\\data\\")
 }
 
-#' Regex seach name in name table
+#' Scan package changes by name only
 #'
-#' Helper function to call \code{searchname} with regex enabled.
+#' Compare currently packages name with previous list \code{pkg_list}.
 #'
-#' Need this because RStudio Addin currently don't support function with
-#' parameters
+#' Use \code{.packages(all.available = TRUE)} to check folder under library
+#' location path \code{lib.loc}. Has more false positives but fast.
+#'
+#' @param startNew Default FALSE, compare user's environment with name table
+#'   shipped with this package, only update difference. If True, build from
+#'   scratch.
+#'
+#' @return list(pkg_to_add, pkg_to_remove)
 #' @export
 #'
-searchname_regex <- function(){
-  searchname(search_regex = TRUE)
+pkg_name_changed <- function(startNew = FALSE){
+  if (startNew) {
+    pkg_list <- .packages(all.available = TRUE)
+    pkg_to_add <- pkg_list
+    pkg_to_remove <- NULL
+    save(pkg_list, file = stringr::str_c(get_data_folder(), "pkg_list.rda"))
+    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
+  } else{
+    data("pkg_list", envir = environment())
+    pkg_list_now <- .packages(all.available = TRUE)
+    # make some changes in both list in development to simulate changes.
+    # TODO remove after passed
+    # pkg_list <- pkg_list[-(1:5)]
+    # pkg_list_now <- pkg_list_now[-(8:12)]
+    # TODO remove above
+    pkg_to_add <- pkg_list_now[!pkg_list_now %in% pkg_list]
+    pkg_to_remove <- pkg_list[!pkg_list %in% pkg_list_now]
+    #sync name list  to current version, use change list to sync names too
+    pkg_list <- pkg_list_now
+    save(pkg_list, file = stringr::str_c(get_data_folder(), "pkg_list.rda"))
+    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
+  }
+
+}
+
+#' Scan package changes by name and version
+#'
+#' Compare current packages name and version with previous table
+#' \code{pkg_table}.
+#'
+#' Use \code{installed.packages} to check DESCRIPTION file for each package folder, more accurate but slower than checking name only.
+#'
+#' @param startNew Default FALSE, compare user's environment with name table
+#'   shipped with this package, only update difference. If True, build from
+#'   scratch.
+#'
+#' @return list(pkg_to_add, pkg_to_remove)
+#' @export
+#'
+pkg_name_version_changed <- function(startNew = FALSE){
+  if (startNew){
+    pkg_table <- data.table::data.table(installed.packages(priority = "NA"))
+    pkg_table <- pkg_table[, .(Package, LibPath, Version)]
+    data.table::setkey(pkg_table, Package, Version)
+    pkg_to_add <- pkg_table[, Package]
+    pkg_to_remove <- NULL
+    save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
+    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
+  } else{
+    data("pkg_table", envir = environment())
+    pkg_table_now <- data.table::data.table(installed.packages(priority = "NA"))
+    pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
+    # make some changes for development test
+    # TODO remove later, change rows, also change version numbers
+    # pkg_table <- pkg_table[6:379, ]
+    # pkg_table_now <- pkg_table_now[1:372,]
+    # pkg_table[5, Version := "3.2"]
+    # TODO remove above later
+    # Version is character
+    data.table::setkey(pkg_table, Package, Version)
+    data.table::setkey(pkg_table_now, Package, Version)
+    pkg_to_remove <- pkg_table[!pkg_table_now][, Package]
+    pkg_to_add <- pkg_table_now[!pkg_table][, Package]
+    #sync pkg table  to current version ------
+    pkg_table <- pkg_table_now
+    save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
+    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
+  }
+}
+
+#' Update name table
+#'
+#' Update name table by package name changes, or by changes both in name and
+#' version.
+#'
+#' In one case, \code{.packages(all.available = TRUE)} found 408 packages
+#' folder, \code{installed.packages} found 379 packages with valid DESCRIPTION
+#' file, the final loading, attaching, listing names function found 267 packages
+#' with at least one name.
+#'
+#' This package shipped with a name table of these 267 packages. When user
+#' updated name table in first time, the package changes were based on this name
+#' table. User can also manually build name table from scratch by sending all
+#' package names to
+#'
+#' @param withVersion Default FALSE, update by package name changes. If TRUE,
+#'   update name table by changes both in name and version version
+#' @param startNew  Default FALSE, compare user's environment with name table
+#'   shipped with this package, only update difference. If True, build from
+#'   scratch.
+#'
+#' @export
+#'
+update_name_table <- function(withVersion = FALSE, startNew = FALSE){
+  # get pkg update list ------
+  if (withVersion) {
+    pkg_updates <- pkg_name_version_changed(startNew)
+    cat("Packages name and version changes:\n")
+  } else {
+    pkg_updates <- pkg_name_changed(startNew)
+    cat("Packages name changes:\n")
+  }
+  # print changes to console
+  pkg_updates
+  # update names by list ------
+  name_table_updates <- scan_names(pkg_updates$pkg_to_add)
+  data.table::setkey(name_table_updates, package, obj_name)
+  # read previous data, merge, discard, setkey, save ------
+  data("name_table", envir = environment())
+  # names to be kept. No direct way to remove rows in data.table, select keeper
+  name_table_keep <- name_table[!package %in% pkg_updates$pkg_to_remove,]
+  name_table <- rbind(name_table_keep, name_table_updates)
+  save(name_table, file = stringr::str_c(get_data_folder(), "name_table.rda"))
+}
+
+#' Build name table for selected packages
+#'
+#' All object names in packages are scanned with
+#' \code{ls("package:pkgname")}.
+#'
+#' Functions, datasets, operators, symbols, alternative formats like
+#' \code{body()<-} are included from \code{ls()}. Package must be loaded and
+#' attached first before using \code{ls()}. Thus all available packages are
+#' loaded and attached in the scanning process. Although extra efforts were made
+#' to unload packages properly after use, there still will be some left over
+#' when the scan finished. It's recommended to build index in a new R session
+#' instead of working session with important data, and restart R session after
+#' building.
+#'
+#' @param package_list packages to be scanned
+#' @return name_table name table of scanned packages
+#'
+scan_names <- function(package_list){
+  # initial loaded packages need to be protected from the clean up process
+  searchlist_0 <- .packages()
+  namespace_0 <- loadedNamespaces()
+  name_list <- vector("list", length(package_list))
+  # some functions need prefix, some do not
+  package_list_prefixed <- stringr::str_c("package:", package_list)
+  error_packages <- character(length(package_list))
+  for (i in seq_along(package_list)) {
+    if (suppressPackageStartupMessages(require(package_list[i],
+                                               character.only = TRUE,
+                                               quietly = TRUE))) {
+      name_list[[i]] <- ls(package_list_prefixed[i])
+      cat(paste0("Scanned ", package_list[i], "\n"))
+      # unload package if not in initial environment
+      if (!package_list[i] %in% searchlist_0) {
+        # some cannot be unloaded because of order, dependency etc
+        try(unloadNamespace(package_list[i]))
+      }
+    } else{# packages cannot be loaded properly
+      error_packages[i] <- package_list[i]
+    }
+  }
+  print(error_packages)
+  # convert nested name list into data table ------
+  name_table_list <- vector("list", length(name_list))
+  for (i in seq_along(name_list)) {
+    if (!is.null(name_list[[i]]) && !identical(name_list[[i]], character(0))) {
+      #print(i)
+      name_table_current <- data.table(package = package_list[i],
+                                       obj_name = name_list[[i]])
+      name_table_list[[i]] <- name_table_current
+    }
+  }
+  rbindlist(name_table_list)
 }
