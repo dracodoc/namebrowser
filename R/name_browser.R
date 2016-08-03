@@ -51,50 +51,53 @@ searchname <- function(search_regex = FALSE) {
                                           start_till_last_word_char)[2] +
                         selection_end["column"] # index offset from cursor
         input_name <- stringr::str_c(left_partial_word, right_partial_word)
-        # input_name <- stringr::str_sub(current_line,
-        #                                start = left_edge,
-        #                                end = right_edge)
     }
-
+    # build UI ------
     title <- ifelse(search_regex,
                     "Regex search name in all packages",
                     "Search name in all packages")
     ui <- miniUI::miniPage(
-        miniUI::gadgetTitleBar(title,
-                       right = miniUI::miniTitleBarButton("load_package",
-                                                  "Load Package",
-                                                  primary = TRUE)),
-        miniUI::miniContentPanel(DT::dataTableOutput("table")),
-        miniUI::miniButtonBlock(shiny::actionButton("insert_prefix", shiny::strong("Insert Package Prefix")))
-    )
-
+            miniUI::gadgetTitleBar(title,
+                right = miniUI::miniTitleBarButton("load_package",
+                                   "Load Package", primary = TRUE)),
+            miniUI::miniContentPanel(DT::dataTableOutput("table")),
+            miniUI::miniButtonBlock(shiny::actionButton("insert_prefix",
+                                    shiny::strong("Insert Package Prefix")))
+          )
+    # build server -----
     server <- function(input, output, session) {
         # Define reactive expressions, outputs, etc.
-        # TODO regex by paramter, this function with default paramter, another helper call with non-default paramter.
         output$table <- DT::renderDataTable(name_table,
                                             server = TRUE,
                                             selection = "single",
                                             filter = 'top',
                                             options = list(
                                                 searchHighlight = TRUE,
-                                                search = list(search = input_name,
-                                                              regex = search_regex
+                                                search = list(search =
+                                                                  input_name,
+                                                              regex =
+                                                                  search_regex
                                                 ),
                                                 pageLength = 7
                                             )
         )
-        # insert library line, run in console, replace current line
+        # insert library line, run library in console, replace current line
         shiny::observeEvent(input$load_package, {
             if (!is.null(input$table_rows_selected)) {
                 row_selected <- input$table_rows_selected
-                lib_line <- stringr::str_c("library(", name_table[row_selected, "package"], ")")
-                new_line <- stringr::str_c(stringr::str_sub(current_line, 1, left_edge),
-                                  name_table[row_selected, "obj_name"],
-                                  stringr::str_sub(current_line, right_edge,
+                lib_line <- stringr::str_c("library(",
+                                           name_table[row_selected, "package"],
+                                           ")")
+                new_line <- stringr::str_c(
+                                stringr::str_sub(current_line, 1, left_edge),
+                                name_table[row_selected, "obj_name"],
+                                stringr::str_sub(current_line, right_edge,
                                           nchar(current_line)))
                 rstudioapi::sendToConsole(lib_line, execute = TRUE)
                 new_2_lines <- stringr::str_c(indent, lib_line, "\n", new_line)
-                rstudioapi::insertText(current_line_range, new_2_lines, id = context$id)
+                rstudioapi::insertText(current_line_range,
+                                       new_2_lines,
+                                       id = context$id)
                 shiny::stopApp()
             }
         })
@@ -102,14 +105,18 @@ searchname <- function(search_regex = FALSE) {
         shiny::observeEvent(input$insert_prefix, {
             if (!is.null(input$table_rows_selected)) {
                 row_selected <- input$table_rows_selected
-                prefixed_name <- stringr::str_c(name_table[row_selected, "package"],
-                                       "::",
-                                       name_table[row_selected, "obj_name"])
-                new_line <- stringr::str_c(stringr::str_sub(current_line, 1, left_edge),
+                prefixed_name <- stringr::str_c(
+                                     name_table[row_selected, "package"],
+                                     "::",
+                                     name_table[row_selected, "obj_name"])
+                new_line <- stringr::str_c(
+                                stringr::str_sub(current_line, 1, left_edge),
                                   prefixed_name,
                                   stringr::str_sub(current_line, right_edge,
                                           nchar(current_line)))
-                rstudioapi::insertText(current_line_range, new_line, id = context$id)
+                rstudioapi::insertText(current_line_range,
+                                       new_line,
+                                       id = context$id)
                 shiny::stopApp()
             }
         })
