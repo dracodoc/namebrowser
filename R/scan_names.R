@@ -7,8 +7,8 @@
 #' @export
 #'
 get_data_folder <- function(){
-    package_folder <- devtools::inst("namebrowser")
-    data_folder <- stringr::str_c(package_folder, "\\data\\")
+  package_folder <- devtools::inst("namebrowser")
+  data_folder <- stringr::str_c(package_folder, "\\data\\")
 }
 
 #' Scan package changes by name only
@@ -22,19 +22,19 @@ get_data_folder <- function(){
 #' @export
 #'
 pkg_name_changed <- function(){
-    data("pkg_list", envir = environment())
-    pkg_list_now <- .packages(all.available = TRUE)
-    # make some changes in both list in development to simulate changes.
-    # TODO remove after passed
-    pkg_list <- pkg_list[-(1:5)]
-    pkg_list_now <- pkg_list_now[-(8:12)]
-    # TODO remove above
-    pkg_to_add <- pkg_list_now[!pkg_list_now %in% pkg_list]
-    pkg_to_remove <- pkg_list[!pkg_list %in% pkg_list_now]
-    # name list synced to current version, use changes list to sync names too
-    pkg_list <- pkg_list_now
-    save(pkg_list, file = stringr::str_c(get_data_folder(), "pkg_list.rda"))
-    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
+  data("pkg_list", envir = environment())
+  pkg_list_now <- .packages(all.available = TRUE)
+  # make some changes in both list in development to simulate changes.
+  # TODO remove after passed
+  pkg_list <- pkg_list[-(1:5)]
+  pkg_list_now <- pkg_list_now[-(8:12)]
+  # TODO remove above
+  pkg_to_add <- pkg_list_now[!pkg_list_now %in% pkg_list]
+  pkg_to_remove <- pkg_list[!pkg_list %in% pkg_list_now]
+  # name list synced to current version, use changes list to sync names too
+  pkg_list <- pkg_list_now
+  save(pkg_list, file = stringr::str_c(get_data_folder(), "pkg_list.rda"))
+  list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
 }
 
 #' Scan package changes by name and version
@@ -48,24 +48,24 @@ pkg_name_changed <- function(){
 #' @export
 #'
 pkg_name_version_changed <- function(){
-    data("pkg_table", envir = environment())
-    pkg_table_now <- data.table::data.table(installed.packages(priority = "NA"))
-    pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
-    # make some changes for development test
-    # TODO remove later, change rows, also change version numbers
-    pkg_table <- pkg_table[6:379, ]
-    pkg_table_now <- pkg_table_now[1:372,]
-    pkg_table[5, Version := "3.2"]
-    # TODO remove above later
-    # Version is character
-    data.table::setkey(pkg_table, Package, Version)
-    data.table::setkey(pkg_table_now, Package, Version)
-    pkg_to_remove <- pkg_table[!pkg_table_now][, Package]
-    pkg_to_add <- pkg_table_now[!pkg_table][, Package]
-    # pkg table sync to current version
-    pkg_table <- pkg_table_now
-    save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
-    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
+  data("pkg_table", envir = environment())
+  pkg_table_now <- data.table::data.table(installed.packages(priority = "NA"))
+  pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
+  # make some changes for development test
+  # TODO remove later, change rows, also change version numbers
+  pkg_table <- pkg_table[6:379, ]
+  pkg_table_now <- pkg_table_now[1:372,]
+  pkg_table[5, Version := "3.2"]
+  # TODO remove above later
+  # Version is character
+  data.table::setkey(pkg_table, Package, Version)
+  data.table::setkey(pkg_table_now, Package, Version)
+  pkg_to_remove <- pkg_table[!pkg_table_now][, Package]
+  pkg_to_add <- pkg_table_now[!pkg_table][, Package]
+  # pkg table sync to current version
+  pkg_table <- pkg_table_now
+  save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
+  list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
 }
 
 #' Update name table
@@ -84,20 +84,20 @@ pkg_name_version_changed <- function(){
 #' @export
 #'
 update_name_table <- function(withVersion = FALSE){
-    # get pkg update list ----
-    if (withVersion) {
+  # get pkg update list ----
+  if (withVersion) {
 
-        cat("Packages name and version changes:\n")
-    } else {
-        cat("Packages name changes:\n")
-    }
-    # print changes to console
+      cat("Packages name and version changes:\n")
+  } else {
+      cat("Packages name changes:\n")
+  }
+  # print changes to console
 
-    # update names by list ----
+  # update names by list ----
 
 
-    # read previous data, merge, discard, save
-    data("name_table", envir = environment())
+  # read previous data, merge, discard, save
+  data("name_table", envir = environment())
 
 
 
