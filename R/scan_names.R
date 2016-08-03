@@ -22,14 +22,19 @@ get_data_folder <- function(){
 #' @export
 #'
 pkg_name_changed <- function(){
-    # scan names by update list
+    data("pkg_list", envir = environment())
     pkg_list_now <- .packages(all.available = TRUE)
-    # merge updates and old data, remove to be removed, in function
-
-    # save data, a character vector
-    save(pkg_list_now,
-         file = stringr::str_c(get_data_folder(),
-                               "pkg_list.rda"))
+    # make some changes in both list in development to simulate changes.
+    # TODO remove after passed
+    pkg_list <- pkg_list[-(1:5)]
+    pkg_list_now <- pkg_list_now[-(8:12)]
+    # TODO remove above
+    pkg_to_add <- pkg_list_now[!pkg_list_now %in% pkg_list]
+    pkg_to_remove <- pkg_list[!pkg_list %in% pkg_list_now]
+    # name list synced to current version, use changes list to sync names too
+    pkg_list <- pkg_list_now
+    save(pkg_list, file = stringr::str_c(get_data_folder(), "pkg_list.rda"))
+    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
 }
 
 #' Scan package changes by name and version
@@ -43,16 +48,14 @@ pkg_name_changed <- function(){
 #' @export
 #'
 pkg_name_version_changed <- function(){
-    data("all_packages_versioned", envir = environment())
+    data("pkg_table", envir = environment())
     pkg_table_now <- data.table(installed.packages(priority = "NA"))
     pkg_table_now <- pkg_table_now[, .(Package, LibPath, Version)]
 
 
 
     #actually only save when previous version and current version are compared and used. a data.table
-    save(pkg_table_now,
-         file = stringr::str_c(get_data_folder(),
-                               "pkg_table.rda"))
+    save(pkg_table, file = stringr::str_c(get_data_folder(), "pkg_table.rda"))
 }
 
 #' Update name table
