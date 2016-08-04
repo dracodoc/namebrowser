@@ -34,17 +34,19 @@ searchname <- function(search_regex = FALSE) {
   } else {# no text select, infer input name
     # search left side of cursor for last partial word
     left_side <- str_sub(current_line, start = 1, end = selection_start["column"] - 1)
-    first_word_char_till_end <- "[^\\w](\\w*)$"
-    left_partial_word <- str_match(left_side, first_word_char_till_end)[2]
-    left_edge <- str_locate(left_side, first_word_char_till_end)[1]
+    word_by_end <- "\\w*$" # "[^\\w]*(\\w*)$"
+    left_partial_word <- str_match(left_side, word_by_end)[1]
+    left_edge <- str_locate(left_side, word_by_end)[1]
+    left_edge <- ifelse(left_edge == 1, 0, left_edge)
     # right side for first partial word
     right_side <- str_sub(current_line, start = selection_start["column"],
                           end = nchar(current_line))
-    start_till_last_word_char <- "^\\w*"
-    right_partial_word <- str_extract(right_side, start_till_last_word_char)
-    right_edge <- str_locate(right_side, start_till_last_word_char)[2] +
+    starting_word <- "^\\w*"
+    right_partial_word <- str_extract(right_side, starting_word)
+    right_edge <- str_locate(right_side, starting_word)[2] +
                   selection_end["column"] # index offset from cursor
-    input_name <- str_c(left_partial_word, right_partial_word)
+    input_name <- str_c(NA_to_empty(left_partial_word),
+                        NA_to_empty(right_partial_word))
   }
   # build UI ------
   title <- ifelse(search_regex,
@@ -100,6 +102,16 @@ searchname <- function(search_regex = FALSE) {
     })
   }
   shiny::runGadget(ui, server, viewer = shiny::dialogViewer("Name browser"))
+}
+
+#' Convert NAs to ""
+#'
+#' In concatnating strings, NAs would cause the result to be NA.
+#'
+#' @export
+#'
+NA_to_empty <- function(s){
+  ifelse(is.na(s), "", s)
 }
 
 #' Regex seach name in name table
