@@ -27,10 +27,5 @@ In one case, \code{.packages(all.available = TRUE)} found 408 packages
 folder, \code{installed.packages} found 379 packages with valid DESCRIPTION
 file, the final loading, attaching, listing names function found 267 packages
 with at least one name.
-
-This package shipped with a name table of these 267 packages. When user
-updated name table in first time, the package changes were based on this name
-table. User can also manually build name table from scratch by sending all
-package names to
 }
 

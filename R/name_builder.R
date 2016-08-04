@@ -62,7 +62,7 @@ pkg_name_changed <- function(startNew = FALSE){
 #' Compare current packages name and version with previous table
 #' \code{pkg_table}.
 #'
-#' Use \code{installed.packages} to check DESCRIPTION file for each package
+#' Use \code{installed.packages()} to check DESCRIPTION file for each package
 #' folder, more accurate than checking name only. R help cautioned it be slow if
 #' thouands of packages available, but checking 300 ~ 400 packages didn't have
 #' significant performance difference. It's recommended to always use this unless
@@ -117,11 +117,6 @@ pkg_name_version_changed <- function(startNew = FALSE){
 #' file, the final loading, attaching, listing names function found 267 packages
 #' with at least one name.
 #'
-#' This package shipped with a name table of these 267 packages. When user
-#' updated name table in first time, the package changes were based on this name
-#' table. User can also manually build name table from scratch by sending all
-#' package names to
-#'
 #' @param withVersion Default TRUE, update name table by changes both in name
 #'   and version. If FALSE, update by package name changes, a little bit faster
 #'   but with more false positives.
@@ -170,7 +165,6 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
   } else{
     name_table_keep <- name_table[!package %in% pkg_to_remove,]
   }
-
   summary_name_table("-- To be removed from original:",
                      name_table[package %in% pkg_to_remove,])
   summary_name_table("-- New scanned updates:", name_table_updates)
@@ -182,8 +176,7 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
 
 #' Print summary of Name table
 #'
-#' @param nt
-#'
+#' @param nt name table to be summarized
 #' @export
 #'
 summary_name_table <- function(table_title, nt){
@@ -194,7 +187,6 @@ summary_name_table <- function(table_title, nt){
 #' Helper method to print console message with default new line
 #'
 #' @param ... send to paste0
-#'
 #' @export
 #'
 println <- function(...){
@@ -251,7 +243,7 @@ scan_names <- function(package_list){
   if (length(error_packages) > 0) {
     println("\n-----------------------------\n!!!!Packages that have problem loading:")
     print(error_packages)
-    println(">> If some packages cannot be loaded with error 'maximal number of DLLs reached...', it's because too many packages were loaded in scan but cannot be unloaded for dependency reason. The DLL limit is 100 according to http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r\n>> Start a new R session, use update_name_table(tryError = TRUE) to scan them again. Every new scan will reduce error packages a little bit.\n>> After several runs, there could be still some error packages that were not installed properly thus cannot be loaded or scanned.\nThere are 400 packages listed in package author's machine, 130 have errors in one scan from scratch, after 3 runs of scan error packages, 47 packages still left, all have installation problems.\n-----------------------\n\n")
+    println(">> If some packages cannot be loaded with error 'maximal number of DLLs reached...', it's because too many packages were loaded in scan but cannot be unloaded for dependency reason. The DLL limit is 100 according to http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r\n>> Start a new R session, use update_name_table(tryError = TRUE) to scan them again. Every new scan will reduce error packages a little bit.\n>> After several runs, there could be still some error packages that were not installed properly thus cannot be loaded or scanned.\n-----------------------\n")
   }
   save(error_packages, file = str_c(get_data_folder(), "error_packages.rda"))
   # convert nested name list into data table ------
@@ -267,7 +259,7 @@ scan_names <- function(package_list){
   name_table_updates <- rbindlist(name_table_list)
   if (name_table_updates[, .N] == 0) {# when all error packages have installation error, pkg_add is not empty but result is empty, set proper column name so other operations will not raise error
     name_table_updates <- data.table(package = character(), obj_name = character())
-    println("-- All packages tried to scan have problem loading properly, no names found")
+    println("-- All packages tried to scan cannot be loaded, could be installation problem")
   }
   setkey(name_table_updates, package, obj_name)
 }

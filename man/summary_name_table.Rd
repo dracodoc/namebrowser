@@ -7,7 +7,7 @@
 summary_name_table(table_title, nt)
 }
 \arguments{
-\item{nt}{}
+\item{nt}{name table to be summarized}
 }
 \description{
 Print summary of Name table
