@@ -190,6 +190,7 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
                      name_table[package %in% pkg_to_remove,])
   summary_name_table("-- New scanned updates:", name_table_updates)
   name_table <- unique(rbind(name_table_keep, name_table_updates))
+  setkey(name_table, package, obj_name)
   summary_name_table("-- Final updated Name table:", name_table)
   println("-- See more options of updating name table in ?namebrowser::update_name_table")
   save(name_table, file = str_c(get_data_folder(), "name_table.rda"))
@@ -283,4 +284,5 @@ scan_names <- function(package_list){
     println("-- All packages tried to scan cannot be loaded, could be installation problem")
   }
   setkey(name_table_updates, package, obj_name)
+  return(name_table_updates)
 }
