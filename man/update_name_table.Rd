@@ -4,15 +4,19 @@
 \alias{update_name_table}
 \title{Update name table}
 \usage{
-update_name_table(withVersion = FALSE, startNew = FALSE)
+update_name_table(withVersion = TRUE, startNew = FALSE, tryError = FALSE)
 }
 \arguments{
-\item{withVersion}{Default FALSE, update by package name changes. If TRUE,
-update name table by changes both in name and version version}
+\item{withVersion}{Default TRUE, update name table by changes both in name
+and version. If FALSE, update by package name changes, a little bit faster
+but with more false positives.}
 
 \item{startNew}{Default FALSE, compare user's environment with name table
 shipped with this package, only update difference. If True, build from
 scratch.}
+
+\item{tryError}{Default FALSE. If True, withVersion and startNew must be
+FALSE, Scan the packages cannot be loaded in last update again.}
 }
 \description{
 Update name table by package name changes, or by changes both in name and

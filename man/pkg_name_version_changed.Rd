@@ -19,6 +19,10 @@ Compare current packages name and version with previous table
 \code{pkg_table}.
 }
 \details{
-Use \code{installed.packages} to check DESCRIPTION file for each package folder, more accurate but slower than checking name only.
+Use \code{installed.packages} to check DESCRIPTION file for each package
+folder, more accurate than checking name only. R help cautioned it be slow if
+thouands of packages available, but checking 300 ~ 400 packages didn't have
+significant performance difference. It's recommended to always use this unless
+it's too slow for you.
 }
 

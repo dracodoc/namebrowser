@@ -19,6 +19,8 @@ Compare currently packages name with previous list \code{pkg_list}.
 }
 \details{
 Use \code{.packages(all.available = TRUE)} to check folder under library
-location path \code{lib.loc}. Has more false positives but fast.
+location path \code{lib.loc}. Faster than checking name and version both, but
+has more false positives. It's recommended to use this only when scan
+packages name and version both is too slow for you.
 }
 

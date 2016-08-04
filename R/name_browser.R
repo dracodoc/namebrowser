@@ -12,7 +12,7 @@
 #' @param search_regex Whether to use regular expression in search. Default
 #'   FALSE to use normal search. Dialog title will be updated to show regex
 #'   mode.
-#'
+#' @import data.table stringr
 #' @export
 #'
 searchname <- function(search_regex = FALSE) {
@@ -84,10 +84,10 @@ searchname <- function(search_regex = FALSE) {
       if (!is.null(input$table_rows_selected)) {
         row_selected <- input$table_rows_selected
         lib_line <- stringr::str_c("library(",
-                                   name_table[row_selected, "package"], ")")
+                                   name_table[row_selected, package], ")")
         new_line <- stringr::str_c(
                         stringr::str_sub(current_line, 1, left_edge),
-                        name_table[row_selected, "obj_name"],
+                        name_table[row_selected, obj_name],
                         stringr::str_sub(current_line, right_edge,
                                   nchar(current_line)))
         rstudioapi::sendToConsole(lib_line, execute = TRUE)
@@ -101,9 +101,9 @@ searchname <- function(search_regex = FALSE) {
       if (!is.null(input$table_rows_selected)) {
         row_selected <- input$table_rows_selected
         prefixed_name <- stringr::str_c(
-                             name_table[row_selected, "package"],
+                             name_table[row_selected, package],
                              "::",
-                             name_table[row_selected, "obj_name"])
+                             name_table[row_selected, obj_name])
         new_line <- stringr::str_c(
                         stringr::str_sub(current_line, 1, left_edge),
                           prefixed_name,
