@@ -16,7 +16,7 @@
 #' @export
 #'
 searchname <- function(search_regex = FALSE) {
-  data("name_table", envir = environment())
+  data("name_table") #, envir = environment()
   # get input ----------
   context <- rstudioapi::getActiveDocumentContext()
   selection_start <- context$selection[[1]]$range$start
