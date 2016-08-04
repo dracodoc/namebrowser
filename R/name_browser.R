@@ -22,10 +22,12 @@ searchname <- function(search_regex = FALSE) {
   selection_start <- context$selection[[1]]$range$start
   selection_end <- context$selection[[1]]$range$end
   current_line <- context$content[selection_start["row"]]
+  # getting indent and current line full range no matter selection mode ----
   indent <- str_match(current_line, "^\\s*")
   current_line_range <- context$selection[[1]]$range
   current_line_range$start["column"] <- 1
   current_line_range$end["column"] <- nchar(current_line) + 1 # full range end at length+1
+  # text selected is easy, problem is with cursor around (incomplete) word
   if (any(selection_start != selection_end)) { # text selected
     input_name <- context$selection[[1]]$text
     # range to be replaced
