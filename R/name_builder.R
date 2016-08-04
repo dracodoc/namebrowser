@@ -5,7 +5,6 @@
 #'
 #' @return installed_package_folder\\data\\
 #' @import stringr
-#' @export
 #'
 get_data_folder <- function(){
   # TODO use project folder in development, change to library folder before release
@@ -109,22 +108,44 @@ pkg_name_version_changed <- function(startNew = FALSE){
 
 #' Update name table
 #'
-#' Update name table by package name changes, or by changes both in name and
-#' version.
+#' First generate list of package changes, then scan new or upgraded packages
+#' for names, add to name table, remove deleted packages entries in name table.
 #'
 #' In one case, \code{.packages(all.available = TRUE)} found 408 packages
 #' folder, \code{installed.packages} found 379 packages with valid DESCRIPTION
 #' file, the final loading, attaching, listing names function found 267 packages
 #' with at least one name.
 #'
-#' @param withVersion Default TRUE, update name table by changes both in name
-#'   and version. If FALSE, update by package name changes, a little bit faster
-#'   but with more false positives.
-#' @param startNew  Default FALSE, compare user's environment with name table
+#' Common usage:
+#'
+#' \code{update_name_table()} Use all default parameter, called by Addin menu
+#' Update name table. Compare package name and version changes to existing name
+#' table, then update it.
+#'
+#' \code{update_name_table(withVersion = FALSE)} Compare changes by package name
+#' change only, then update name table.
+#'
+#' \code{update_name_table(startNew = TRUE)} Build name table from scratch,
+#' ignore existing name table content.
+#'
+#' \code{update_name_table(tryError = TRUE)} Used to finish unscanned packages
+#' that failed to load in last scan because of DLL limit error. Must run with
+#' new R session. May need to run several times to finish all packages that can
+#' be scanned. There could still be some packages left at last because of
+#' package installation problems.
+#'
+#' @param withVersion Default TRUE, check package changes both in name and
+#'   version. If FALSE, check package name changes only, a little bit faster but
+#'   with more false positives. The speed difference is minor compared to the
+#'   package scanning process. It's recommended to use default option unless the
+#'   package listing process is really slow. Though in that case the package
+#'   scanning process will be much more slower anyway.
+#' @param startNew Default FALSE, compare user's environment with name table
 #'   shipped with this package, only update difference. If True, build from
 #'   scratch.
 #' @param tryError Default FALSE. If True, withVersion and startNew must be
 #'   FALSE, Scan the packages cannot be loaded in last update again.
+#'
 #' @import data.table stringr
 #' @export
 #'
@@ -134,15 +155,15 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
     data(error_packages)
     pkg_to_add <- error_packages
     pkg_to_remove <- NULL
-    println("-- Scan packages failed to load in last scan again:")
+    println("-- Rescan packages failed to load in last scan:")
     print(pkg_to_add)
   } else{# scan package changes
     if (withVersion) {
       pkg_updates <- pkg_name_version_changed(startNew)
-      println("-- Packages name and version changes:")
+      println("-- Scan packages name and version changes:")
     } else {
       pkg_updates <- pkg_name_changed(startNew)
-      println("-- Packages name changes:")
+      println("-- Scan packages name changes:")
     }
     if (identical(pkg_updates$pkg_to_add, character(0)) &&
         identical(pkg_updates$pkg_to_remove, character(0))) {
@@ -169,8 +190,8 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
                      name_table[package %in% pkg_to_remove,])
   summary_name_table("-- New scanned updates:", name_table_updates)
   name_table <- unique(rbind(name_table_keep, name_table_updates))
-  println(length(error_packages), " packages were not scanned because of error")
   summary_name_table("-- Final updated Name table:", name_table)
+  println("-- See more options of updating name table in ?update_name_table")
   save(name_table, file = str_c(get_data_folder(), "name_table.rda"))
 }
 

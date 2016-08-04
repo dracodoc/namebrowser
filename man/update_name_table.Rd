@@ -7,9 +7,12 @@
 update_name_table(withVersion = TRUE, startNew = FALSE, tryError = FALSE)
 }
 \arguments{
-\item{withVersion}{Default TRUE, update name table by changes both in name
-and version. If FALSE, update by package name changes, a little bit faster
-but with more false positives.}
+\item{withVersion}{Default TRUE, check package changes both in name and
+version. If FALSE, check package name changes only, a little bit faster but
+with more false positives. The speed difference is minor compared to the
+package scanning process. It's recommended to use default option unless the
+package listing process is really slow. Though in that case the package
+scanning process will be much more slower anyway.}
 
 \item{startNew}{Default FALSE, compare user's environment with name table
 shipped with this package, only update difference. If True, build from
@@ -19,13 +22,31 @@ scratch.}
 FALSE, Scan the packages cannot be loaded in last update again.}
 }
 \description{
-Update name table by package name changes, or by changes both in name and
-version.
+First generate list of package changes, then scan new or upgraded packages
+for names, add to name table, remove deleted packages entries in name table.
 }
 \details{
 In one case, \code{.packages(all.available = TRUE)} found 408 packages
 folder, \code{installed.packages} found 379 packages with valid DESCRIPTION
 file, the final loading, attaching, listing names function found 267 packages
 with at least one name.
+
+Common usage:
+
+\code{update_name_table()} Use all default parameter, called by Addin menu
+Update name table. Compare package name and version changes to existing name
+table, then update it.
+
+\code{update_name_table(withVersion = FALSE)} Compare changes by package name
+change only, then update name table.
+
+\code{update_name_table(startNew = TRUE)} Build name table from scratch,
+ignore existing name table content.
+
+\code{update_name_table(tryError = TRUE)} Used to finish unscanned packages
+that failed to load in last scan because of DLL limit error. Must run with
+new R session. May need to run several times to finish all packages that can
+be scanned. There could still be some packages left at last because of
+package installation problems.
 }
 

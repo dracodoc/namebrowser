@@ -108,8 +108,6 @@ searchname <- function(search_regex = FALSE) {
 #'
 #' In concatnating strings, NAs would cause the result to be NA.
 #'
-#' @export
-#'
 NA_to_empty <- function(s){
   ifelse(is.na(s), "", s)
 }
