@@ -86,7 +86,7 @@ pkg_name_version_changed <- function(startNew = FALSE){
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   } else{
     data("pkg_table", package = "namebrowser", envir = environment())
-    pkg_table_now <- data.table(installed.packages(priority = "NA"))
+    pkg_table_now <- data.table(installed.packages())
     pkg_table_now <- pkg_table_now[, list(Package, LibPath, Version)]
     # make some changes for development test
     # TODO remove later, change rows, also change version numbers
