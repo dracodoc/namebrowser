@@ -49,6 +49,10 @@ pkg_name_changed <- function(startNew = FALSE){
     # TODO remove above
     pkg_to_add <- pkg_list_now[!pkg_list_now %in% pkg_list]
     pkg_to_remove <- pkg_list[!pkg_list %in% pkg_list_now]
+    println("-- Packages to add:")
+    print(pkg_to_add)
+    println("-- Pckages to remove:")
+    print(pkg_to_remove)
     #sync name list  to current version, use change list to sync names too
     pkg_list <- pkg_list_now
     save(pkg_list, file = str_c(get_data_folder(), "pkg_list.rda"))
@@ -97,12 +101,17 @@ pkg_name_version_changed <- function(startNew = FALSE){
     # Version is character
     setkey(pkg_table, Package, Version)
     setkey(pkg_table_now, Package, Version)
-    pkg_to_remove <- pkg_table[!pkg_table_now][, Package]
-    pkg_to_add <- pkg_table_now[!pkg_table][, Package]
+    pkg_to_remove_nv <- pkg_table[!pkg_table_now]
+    pkg_to_add_nv <- pkg_table_now[!pkg_table]
+    println("-- Packages to add:")
+    print(pkg_to_add_nv)
+    println("-- Pckages to remove:")
+    print(pkg_to_remove_nv)
     #sync pkg table  to current version ------
     pkg_table <- pkg_table_now
     save(pkg_table, file = str_c(get_data_folder(), "pkg_table.rda"))
-    list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
+    list("pkg_to_add" = pkg_to_add_nv[, Package],
+         "pkg_to_remove" = pkg_to_remove_nv[, Package])
   }
 }
 
@@ -172,7 +181,8 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
     }
     pkg_to_add <- pkg_updates$pkg_to_add
     pkg_to_remove <- pkg_updates$pkg_to_remove
-    print(pkg_updates)
+    # move print to listing function, so that each have its own process, version changes can be printed
+    #print(pkg_updates)
   }
   # update names by list ------
   name_table_updates <- scan_names(pkg_to_add)
@@ -189,6 +199,7 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
   summary_name_table("-- To be removed from original:",
                      name_table[package %in% pkg_to_remove,])
   summary_name_table("-- New scanned updates:", name_table_updates)
+  # Note because of version changes, it's possible to remove package A then add package A again, must remove first, add later.
   name_table <- unique(rbind(name_table_keep, name_table_updates))
   setkey(name_table, package, obj_name)
   summary_name_table("-- Final updated Name table:", name_table)
