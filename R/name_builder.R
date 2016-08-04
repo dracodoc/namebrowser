@@ -9,9 +9,11 @@
 #'
 get_data_folder <- function(){
   # TODO use project folder in development, change to library folder before release
-  # package_folder <- devtools::inst("namebrowser")
-  package_folder <- "d:\\Work\\R\\namebrowser\\"
-  data_folder <- str_c(package_folder, "\\data\\")
+  # devtools version need extra dll, when too many lib loading error happened, this cannot run, further prevent data to be saved, use base version instead.
+  #package_folder <- devtools::inst("namebrowser")
+  # package_folder <- "d:\\Work\\R\\namebrowser\\"
+  package_folder <- find.package("namebrowser")
+  data_folder <- str_c(package_folder, "/data/")
 }
 
 #' Scan package changes by name only
@@ -53,7 +55,6 @@ pkg_name_changed <- function(startNew = FALSE){
     save(pkg_list, file = str_c(get_data_folder(), "pkg_list.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   }
-
 }
 
 #' Scan package changes by name and version
@@ -91,7 +92,7 @@ pkg_name_version_changed <- function(startNew = FALSE){
     # make some changes for development test
     # TODO remove later, change rows, also change version numbers
     # pkg_table <- pkg_table[6:379, ]
-    # pkg_table_now <- pkg_table_now[1:372,]
+    # pkg_table_now <- pkg_table_now[1:300,]
     # pkg_table[5, Version := "3.2"]
     # TODO remove above later
     # Version is character
@@ -138,19 +139,19 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
     data(error_packages)
     pkg_to_add <- error_packages
     pkg_to_remove <- NULL
-    cat("-- Scan packages failed to load in last scan again:\n")
+    println("-- Scan packages failed to load in last scan again:")
     print(pkg_to_add)
   } else{# scan package changes
     if (withVersion) {
       pkg_updates <- pkg_name_version_changed(startNew)
-      cat("-- Packages name and version changes:\n")
+      println("-- Packages name and version changes:")
     } else {
       pkg_updates <- pkg_name_changed(startNew)
-      cat("-- Packages name changes:\n")
+      println("-- Packages name changes:")
     }
     if (identical(pkg_updates$pkg_to_add, character(0)) &&
         identical(pkg_updates$pkg_to_remove, character(0))) {
-      cat("Nothing to update.\n")
+      println("Nothing to update.")
       return()
     }
     pkg_to_add <- pkg_updates$pkg_to_add
@@ -162,10 +163,42 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
   setkey(name_table_updates, package, obj_name)
   # read previous data, merge, discard, setkey, save ------
   data("name_table", envir = environment())
+  summary_name_table("-- Original Name table:", name_table)
   # names to be kept. No direct way to remove rows in data.table, select keeper
-  name_table_keep <- name_table[!package %in% pkg_to_remove,]
+  if (startNew) {
+    name_table_keep <- data.table(package = character(), obj_name = character())
+  } else{
+    name_table_keep <- name_table[!package %in% pkg_to_remove,]
+  }
+
+  summary_name_table("-- To be removed from original:",
+                     name_table[package %in% pkg_to_remove,])
+  summary_name_table("-- New scanned updates:", name_table_updates)
   name_table <- unique(rbind(name_table_keep, name_table_updates))
+  println(length(error_packages), " packages were not scanned because of error")
+  summary_name_table("-- Final updated Name table:", name_table)
   save(name_table, file = str_c(get_data_folder(), "name_table.rda"))
+}
+
+#' Print summary of Name table
+#'
+#' @param nt
+#'
+#' @export
+#'
+summary_name_table <- function(table_title, nt){
+  println(table_title, "\n",
+             uniqueN(nt[, package]), " packages, ", nt[, .N], " names")
+}
+
+#' Helper method to print console message with default new line
+#'
+#' @param ... send to paste0
+#'
+#' @export
+#'
+println <- function(...){
+  cat(paste0(..., "\n"))
 }
 
 #' Build name table for selected packages
@@ -188,7 +221,7 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
 #'
 scan_names <- function(package_list){
   if (identical(package_list, character(0))) {
-    return(NULL)
+    return(data.table(package = character(), obj_name = character()))
   }
   # initial loaded packages need to be protected from the clean up process
   searchlist_0 <- .packages()
@@ -198,16 +231,16 @@ scan_names <- function(package_list){
   package_list_prefixed <- str_c("package:", package_list)
   error_packages <- character(length(package_list))
   for (i in seq_along(package_list)) {
-    cat(paste0(".. Loading package ", package_list[i], "\n"))
+    println(paste0(".. Loading package ", package_list[i]))
     if (suppressPackageStartupMessages(require(package_list[i],
                                                character.only = TRUE,
                                                quietly = TRUE))) {
       name_list[[i]] <- ls(package_list_prefixed[i])
-      cat(paste0("** Scanned pacakge ", package_list[i], "\n"))
+      println(paste0("** Scanned pacakge ", package_list[i]))
       # unload package if not in initial environment
       if (!package_list[i] %in% searchlist_0) {
         # some cannot be unloaded because of order, dependency etc
-        cat(paste0("** Unload  pacakge ", package_list[i], "\n"))
+        println(paste0("** Unload  pacakge ", package_list[i]))
         try(unloadNamespace(package_list[i]))
       }
     } else{# packages cannot be loaded properly
@@ -216,9 +249,9 @@ scan_names <- function(package_list){
   }
   error_packages <- error_packages[error_packages != ""] # initialized with ""
   if (length(error_packages) > 0) {
-    cat("\n!!!!Packages that have problem loading:\n")
+    println("\n-----------------------------\n!!!!Packages that have problem loading:")
     print(error_packages)
-    cat("-- If some packages cannot be loaded with error 'maximal number of DLLs reached...', it's because too many packages were loaded in scan but cannot be unloaded for dependency reason. The DLL limit is 100 according to http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r\n-- Start a new R session, use update_name_table(tryError = TRUE) to scan them again. Every new scan will reduce error packages a little bit.\n-- After several runs, there could be still some error packages that were not installed properly thus cannot be loaded or scanned.\nThere are 400 packages listed in package author's machine, 130 have errors in one scan from scratch, after 3 runs of scan error packages, 47 packages still left, all have installation problems.")
+    println(">> If some packages cannot be loaded with error 'maximal number of DLLs reached...', it's because too many packages were loaded in scan but cannot be unloaded for dependency reason. The DLL limit is 100 according to http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r\n>> Start a new R session, use update_name_table(tryError = TRUE) to scan them again. Every new scan will reduce error packages a little bit.\n>> After several runs, there could be still some error packages that were not installed properly thus cannot be loaded or scanned.\nThere are 400 packages listed in package author's machine, 130 have errors in one scan from scratch, after 3 runs of scan error packages, 47 packages still left, all have installation problems.\n-----------------------\n\n")
   }
   save(error_packages, file = str_c(get_data_folder(), "error_packages.rda"))
   # convert nested name list into data table ------
@@ -231,5 +264,10 @@ scan_names <- function(package_list){
       name_table_list[[i]] <- name_table_current
     }
   }
-  rbindlist(name_table_list)
+  name_table_updates <- rbindlist(name_table_list)
+  if (name_table_updates[, .N] == 0) {# when all error packages have installation error, pkg_add is not empty but result is empty, set proper column name so other operations will not raise error
+    name_table_updates <- data.table(package = character(), obj_name = character())
+    println("-- All packages tried to scan have problem loading properly, no names found")
+  }
+  setkey(name_table_updates, package, obj_name)
 }
