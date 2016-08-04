@@ -20,3 +20,4 @@ Imports:
     miniUI,
     DT
 RoxygenNote: 5.0.1
+Depends: data.table
