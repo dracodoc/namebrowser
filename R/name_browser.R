@@ -26,8 +26,7 @@ searchname <- function(search_regex = FALSE) {
   indent <- str_match(current_line, "^\\s*")
   current_line_range <- context$selection[[1]]$range
   current_line_range$start["column"] <- 1
-  current_line_range$end["column"] <- nchar(current_line) + 1 # full range end at length+1
-  # text selected is easy, problem is with cursor around (incomplete) word
+  current_line_range$end["column"] <- nchar(current_line) + 1 # full range end at length + 1
   if (any(selection_start != selection_end)) { # text selected
     input_name <- context$selection[[1]]$text
     # range to be replaced
@@ -36,14 +35,13 @@ searchname <- function(search_regex = FALSE) {
   } else {# no text select, infer input name
     # search left side of cursor for last partial word
     left_side <- str_sub(current_line, start = 1, end = selection_start["column"] - 1)
-    word_by_end <- "\\w*$" # "[^\\w]*(\\w*)$"
+    word_by_end <- "\\w*$" # "[^\\w]*(\\w*)$" with $ anchor, actually search from right side end
     left_partial_word <- str_match(left_side, word_by_end)[1]
-    left_edge <- str_locate(left_side, word_by_end)[1]
-    left_edge <- ifelse(left_edge == 1, 0, left_edge)
+    left_edge <- str_locate(left_side, word_by_end)[1] - 1 # need -1 now when regex pattern changed. previous pattern need a leading nonword character, missed when word in line start
     # right side for first partial word
     right_side <- str_sub(current_line, start = selection_start["column"],
                           end = nchar(current_line))
-    starting_word <- "^\\w*"
+    starting_word <- "^\\w*" # symmetrical with left side
     right_partial_word <- str_extract(right_side, starting_word)
     right_edge <- str_locate(right_side, starting_word)[2] +
                   selection_end["column"] # index offset from cursor
