@@ -40,7 +40,7 @@ pkg_name_changed <- function(startNew = FALSE){
     save(pkg_list, file = str_c(get_data_folder(), "pkg_list.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   } else{
-    data("pkg_list", envir = environment())
+    data("pkg_list", package = "namebrowser", envir = environment())
     pkg_list_now <- .packages(all.available = TRUE)
     # make some changes in both list in development to simulate changes.
     # TODO remove after passed
@@ -77,7 +77,7 @@ pkg_name_changed <- function(startNew = FALSE){
 #'
 pkg_name_version_changed <- function(startNew = FALSE){
   if (startNew) {
-    pkg_table <- data.table(installed.packages(priority = "NA"))
+    pkg_table <- data.table(installed.packages())
     pkg_table <- pkg_table[, .(Package, LibPath, Version)]
     setkey(pkg_table, Package, Version)
     pkg_to_add <- pkg_table[, Package]
@@ -85,7 +85,7 @@ pkg_name_version_changed <- function(startNew = FALSE){
     save(pkg_table, file = str_c(get_data_folder(), "pkg_table.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   } else{
-    data("pkg_table", envir = environment())
+    data("pkg_table", package = "namebrowser", envir = environment())
     pkg_table_now <- data.table(installed.packages(priority = "NA"))
     pkg_table_now <- pkg_table_now[, list(Package, LibPath, Version)]
     # make some changes for development test
@@ -152,7 +152,7 @@ pkg_name_version_changed <- function(startNew = FALSE){
 update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = FALSE){
   # get pkg update list ------
   if (tryError) { # scan error pacakage again
-    data(error_packages)
+    data(error_packages, package = "namebrowser", envir = environment())
     pkg_to_add <- error_packages
     pkg_to_remove <- NULL
     println("-- Rescan packages failed to load in last scan:")
@@ -178,7 +178,7 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
   name_table_updates <- scan_names(pkg_to_add)
   setkey(name_table_updates, package, obj_name)
   # read previous data, merge, discard, setkey, save ------
-  data("name_table", envir = environment())
+  data("name_table", package = "namebrowser", envir = environment())
   summary_name_table("-- Original Name table:", name_table)
   # names to be kept. No direct way to remove rows in data.table, select keeper
   if (startNew) {
@@ -191,7 +191,7 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
   summary_name_table("-- New scanned updates:", name_table_updates)
   name_table <- unique(rbind(name_table_keep, name_table_updates))
   summary_name_table("-- Final updated Name table:", name_table)
-  println("-- See more options of updating name table in ?update_name_table")
+  println("-- See more options of updating name table in ?namebrowser::update_name_table")
   save(name_table, file = str_c(get_data_folder(), "name_table.rda"))
 }
 
@@ -264,7 +264,7 @@ scan_names <- function(package_list){
   if (length(error_packages) > 0) {
     println("\n-----------------------------\n!!!!Packages that have problem loading:")
     print(error_packages)
-    println(">> If some packages cannot be loaded with error 'maximal number of DLLs reached...', it's because too many packages were loaded in scan but cannot be unloaded for dependency reason. The DLL limit is 100 according to http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r\n>> Start a new R session, use update_name_table(tryError = TRUE) to scan them again. Every new scan will reduce error packages a little bit.\n>> After several runs, there could be still some error packages that were not installed properly thus cannot be loaded or scanned.\n-----------------------\n")
+    println(">> If some packages cannot be loaded with error 'maximal number of DLLs reached...', it's because too many packages were loaded in scan but cannot be unloaded for dependency reason. The DLL limit is 100 according to http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r\n>> Start a new R session, use namebrowser::update_name_table(tryError = TRUE) to scan them again. Every new scan will reduce error packages a little bit.\n>> After several runs, there could be still some error packages that were not installed properly thus cannot be loaded or scanned.\n-----------------------\n")
   }
   save(error_packages, file = str_c(get_data_folder(), "error_packages.rda"))
   # convert nested name list into data table ------
