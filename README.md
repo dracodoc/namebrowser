@@ -19,8 +19,8 @@ When I had a working prototype, I found having a name table of all packages coul
 - Run following lines in RStudio console:
 
         install.packages("devtools") 
-        the CRAN version DT is not compatible with current code
-        devtools::install_github('rstudio/DT') # 
+        # the CRAN version DT is not compatible with current code
+        devtools::install_github('rstudio/DT')
         devtools::install_github("dracodoc/namebrowser")
 
 You can assign keyboard shortcut to functions:
