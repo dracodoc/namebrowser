@@ -1,12 +1,26 @@
 # namebrowser
 RStudio Addin that scan all installed packages for names, search name to insert `library(pkg)` or `pkg::` prefix
 
+## Motivation
+There are thousands of R packages, sometimes I knew a method or a dataset I want to use but not sure which package it is in, especially when there are several possible candidates. You also need to know the package name before you can search help on that method. R provided `??` search options but that is a full text search, slower than I expected, too many false positives.
+
+RStudio can provide auto completion and help when you input even a partial name, but it also need to know the package first unless it was already loaded and attached. An ideal solution will be a global search mode in RStudio:
+  
+  - User input some name, press a keyboard shortcut, RStudio search all packages for that name, provide suggestions.
+  - User select the package and name wanted, then either load the package by `library(pkg)` or insert the `pkg::` prefix.
+  
+I submitted the [feature request](https://support.rstudio.com/hc/en-us/community/posts/212206388-automatically-load-packages-like-the-auto-import-in-IntelliJ-IDEA) to RStudio. Then felt this could be good excercise for me to learn about RStudio Addin, I tried to implement it by myself. Because of the Addin UI is limited, this is not as optimal as the RStudio builtin auto complete. I think it could be a proof of concept to test the idea or gather feedback.  
+  
+When I had a working prototype, I found having a name table of all packages could provide another way to explore packages. For example, you can search and filter by package name, function, dataset or even symbol name (it's difficult to search symbol in usual way). You can have a quick look at what a package provides (it could be quicker than flipping though vignettes), insert the `pkg::`prefix with a name to source editor, then press F1 to look at the help page.
+
 ## Installation and Usage
 
 - Install RStudio newest release version.
 - Run following lines in RStudio console:
 
         install.packages("devtools") 
+        the CRAN version DT is not compatible with current code
+        devtools::install_github('rstudio/DT') # 
         devtools::install_github("dracodoc/namebrowser")
 
 You can assign keyboard shortcut to functions:
@@ -42,18 +56,6 @@ Since the name table shipped with package only include about 300 packages, you s
   The scanning process will still update the name table with success results, and save the list of packages that fail to load. You can **start a new R session** (it's a must since the DLL limit has been reached), run `update_name_table(tryError = TRUE)` to process these packages specifically. This time more packages would be scanned successfully, but there could still be some left. Just start a new R session and run `update_name_table(tryError = TRUE)` again. It took 3 runs to process the 400 packages.
     
   After several runs, all the packages that left in the error package list are packages with installation problem. There is nothing can do with the Addin itself. You can either uninstall/reinstall them or just leave it as is, it doesn't bother the Addin working or updating except some error messages.
-
-## Motivation
-There are thousands of R packages, sometimes I knew a method or a dataset I want to use but not sure which package it is in, especially when there are several possible candidates. You also need to know the package name before you can search help on that method. R provided `??` search options but that is a full text search, slower than I expected, too many false positives.
-
-RStudio can provide auto completion and help when you input even a partial name, but it also need to know the package first unless it was already loaded and attached. An ideal solution will be a global search mode in RStudio:
-  
-  - User input some name, press a keyboard shortcut, RStudio search all packages for that name, provide suggestions.
-  - User select the package and name wanted, then either load the package by `library(pkg)` or insert the `pkg::` prefix.
-  
-I submitted the [feature request](https://support.rstudio.com/hc/en-us/community/posts/212206388-automatically-load-packages-like-the-auto-import-in-IntelliJ-IDEA) to RStudio. Then felt this could be good excercise for me to learn about RStudio Addin, I tried to implement it by myself. Because of the Addin UI is limited, this is not as optimal as the RStudio builtin auto complete. I think it could be a proof of concept to test the idea or gather feedback.  
-  
-When I had a working prototype, I found having a name table of all packages could provide another way to explore packages. For example, you can search and filter by package name, function, dataset or even symbol name (it's difficult to search symbol in usual way). You can have a quick look at what a package provides (it could be quicker than flipping though vignettes), insert the `pkg::`prefix with a name to source editor, then press F1 to look at the help page.
 
 
  
