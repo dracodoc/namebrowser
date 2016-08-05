@@ -37,7 +37,7 @@ You can use the name table shipped with package immediately, input some name in 
 
 A pop up window will list all the names in the table with your input as search condition.
 
-![pop up window](/inst/screenshot/browser1_annot.png)
+![pop up window](/inst/screenshot/browser.png)
 
 Note the Addin can pick up the input automatically in these cases, the input don't have to be a complete word:
 - Double click in a word to select that word, or select a word manually. Selected text will be the search input.
