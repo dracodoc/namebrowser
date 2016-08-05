@@ -31,7 +31,7 @@ You can assign keyboard shortcut to functions:
 
 ### name browser
 
-You can use the name table shipped with package immediately, input some name in RStudio source editor, click the Addin toolbar button to select `Names - Search name`. A pop up window will list all the names in the table with your input as search condition.
+You can use the name table shipped with package immediately, input some name in RStudio **source editor** or **console**, click the Addin toolbar button to select `Names - Search name`. A pop up window will list all the names in the table with your input as search condition.
 
 Note the Addin can pick up the input automatically in these cases, the input don't have to be a complete word:
 - Double click in a word to select that word, or select a word manually. Selected text will be the search input.
