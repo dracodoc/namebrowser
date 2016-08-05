@@ -32,11 +32,12 @@ You can assign keyboard shortcut to functions:
 ### name browser
 
 You can use the name table shipped with package immediately, input some name in RStudio **source editor** or **console**, click the Addin toolbar button to select `Names - Search name`. 
-![addin toolbar](/inst/screenshot/browser.png)
+
+![Addin toolbar](/inst/screenshot/addin_toolbar.png)
 
 A pop up window will list all the names in the table with your input as search condition.
 
-![pop up window]
+![pop up window](/inst/screenshot/browser1_annot.png)
 
 Note the Addin can pick up the input automatically in these cases, the input don't have to be a complete word:
 - Double click in a word to select that word, or select a word manually. Selected text will be the search input.
@@ -49,6 +50,8 @@ You can further modify the global search input, or filter the packages in packag
 Of course you can just browsing and searching through the name table to see what's available in certain package.
 
 You can also use the Addin menu `Names - Regex search name` to enable regular expression in search. Note regular expression written in source editor probably cannot be picked up automatically like normal mode, better input them in the pop up window. Unlike normal search, there is no highlight for regular expression matches.
+
+![regex search](/inst/screenshot/regex.png)
 
 ### build name table
 
