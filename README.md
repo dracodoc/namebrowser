@@ -1,17 +1,9 @@
 # namebrowser
 RStudio Addin that scan all installed packages for names, search name to insert `library(pkg)` or `pkg::` prefix
 
-## Motivation
-There are thousands of R packages, sometimes I knew a method or a dataset I want to use but not sure which package it is in, especially when there are several possible candidates. You also need to know the package name before you can search help on that method. R provided `??` search options but that is a full text search, slower than I expected, too many false positives.
+If you knew some function or dataset but not sure which package it is in (sometimes there seem to be many possible candidates), input the name in editor or console, press a keyboard shortcut will bring a pop up window to search all names in all installed packages, with your input as search term. You can further search and browse the table, select the one you want then the addin will insert the package prefix or run `library(pkg) in console automatically. 
 
-RStudio can provide auto completion and help when you input even a partial name, but it also need to know the package first unless it was already loaded and attached. An ideal solution will be a global search mode in RStudio:
-  
-  - User input some name, press a keyboard shortcut, RStudio search all packages for that name, provide suggestions.
-  - User select the package and name wanted, then either load the package by `library(pkg)` or insert the `pkg::` prefix.
-  
-I submitted the [feature request](https://support.rstudio.com/hc/en-us/community/posts/212206388-automatically-load-packages-like-the-auto-import-in-IntelliJ-IDEA) to RStudio. Then felt this could be good excercise for me to learn about RStudio Addin, I tried to implement it by myself. Because of the Addin UI is limited, this is not as optimal as the RStudio builtin auto complete. I think it could be a proof of concept to test the idea or gather feedback.  
-  
-When I had a working prototype, I found having a name table of all packages could provide another way to explore packages. For example, you can search and filter by package name, function, dataset or even symbol name (it's difficult to search symbol in usual way). You can have a quick look at what a package provides (it could be quicker than flipping though vignettes), insert the `pkg::`prefix with a name to source editor, then press F1 to look at the help page.
+Or you can just browse the table to look what's inside every package, compare packages to have a good overview.
 
 ## Installation and Usage
 
@@ -43,7 +35,7 @@ Note the Addin can pick up the input automatically in these cases, the input don
 - Double click in a word to select that word, or select a word manually. Selected text will be the search input.
 - When the cursor is in the begining, middle and end of a word, the word will be picked up. For example you are inputing a word but not sure about which package it is in, leave the cursor at the end of the word then bring up the Addin.
 
-You can further modify the global search input, or filter the packages in package search box. After you select a name wanted, either 
+You can further modify the global search input, or filter the packages in package search box. After you select a row, either 
 - click `Load Package` to run `library(pkg)` in console, insert `library(pkg)` in previous line, replace the name input in source editor with the name selected. With selected packaged loaded and attached, the usual auto completion and help are all available now.
 - or click `Insert Package Prefix` button at bottom, just insert the full prefixed object name `pkg::name` to replace the input in source editor. This way you don't need to attach the package, and you still can check the help page for the name.
 
