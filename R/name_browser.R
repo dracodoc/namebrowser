@@ -55,10 +55,11 @@ searchname <- function(search_regex = FALSE) {
   ui <- miniPage(
     gadgetTitleBar(title, right = miniTitleBarButton("load_package",
                                     "Load Package", primary = TRUE)),
-    miniContentPanel(DT::dataTableOutput("table")),
+    # table inside content panel so the scrolling is contained
+    miniContentPanel(DT::dataTableOutput("table", height = "100%")),
     miniButtonBlock(shiny::actionButton("insert_prefix",
                             shiny::strong("Insert Package Prefix")))
-        )
+  )
   # build server -----
   server <- function(input, output, session) {
     # Define reactive expressions, outputs, etc.
@@ -101,7 +102,8 @@ searchname <- function(search_regex = FALSE) {
       }
     })
   }
-  shiny::runGadget(ui, server, viewer = shiny::dialogViewer("Name browser"))
+  shiny::runGadget(ui, server, viewer = shiny::dialogViewer("Name browser",
+                                                            height = 650))
 }
 
 #' Convert NAs to ""

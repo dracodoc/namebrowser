@@ -7,9 +7,7 @@
 #' @import stringr
 #'
 get_data_folder <- function(){
-  # TODO use project folder in development, change to library folder before release
   # devtools version need extra dll, when too many lib loading error happened, this cannot run, further prevent data to be saved, use base version instead.
-  #package_folder <- devtools::inst("namebrowser")
   # package_folder <- "d:\\Work\\R\\namebrowser\\"
   package_folder <- find.package("namebrowser")
   data_folder <- str_c(package_folder, "/data/")
