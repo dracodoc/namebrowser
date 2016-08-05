@@ -55,7 +55,6 @@ searchname <- function(search_regex = FALSE) {
   ui <- miniPage(
     gadgetTitleBar(title, right = miniTitleBarButton("load_package",
                                     "Load Package", primary = TRUE)),
-    # table inside content panel so the scrolling is contained
     miniContentPanel(DT::dataTableOutput("table", height = "100%")),
     miniButtonBlock(shiny::actionButton("insert_prefix",
                             shiny::strong("Insert Package Prefix")))
