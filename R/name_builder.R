@@ -31,13 +31,13 @@ get_data_folder <- function(){
 #' @export
 #'
 pkg_name_changed <- function(startNew = FALSE){
-  if (startNew) {
+  if (identical(startNew, TRUE)) {
     pkg_list <- .packages(all.available = TRUE)
     pkg_to_add <- pkg_list
     pkg_to_remove <- NULL
     save(pkg_list, file = str_c(get_data_folder(), "pkg_list.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
-  } else{
+  } else if (identical(startNew, FALSE)) {
     data("pkg_list", package = "namebrowser", envir = environment())
     pkg_list_now <- .packages(all.available = TRUE)
     # make some changes in both list in development to simulate changes.

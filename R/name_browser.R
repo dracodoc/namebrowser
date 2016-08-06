@@ -62,17 +62,13 @@ searchname <- function(search_regex = FALSE) {
   # build server -----
   server <- function(input, output, session) {
     # Define reactive expressions, outputs, etc.
-    output$table <- DT::renderDataTable(name_table,
-                                        server = TRUE,
-                                        selection = "single",
-                                        filter = 'top',
-                                        options = list(
-                                          searchHighlight = TRUE,
-                                          search = list(search = input_name,
+     dt_nt <- DT::datatable(name_table, selection = "single", filter = 'top',
+                            options = list(searchHighlight = TRUE,
+                                           search = list(search = input_name,
                                                         regex = search_regex),
-                                          pageLength = 7
-                                        )
-    )
+                                           pageLength = 7),
+                            callback = DT::JS("$(table.table().container()).find('input').first().focus();"))
+    output$table <- DT::renderDataTable(dt_nt, server = TRUE)
     # insert library line, run library in console, replace current line
     shiny::observeEvent(input$load_package, {
       if (!is.null(input$table_rows_selected)) {
