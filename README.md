@@ -3,7 +3,13 @@ RStudio Addin that scan all installed packages for names, search name to insert 
 
 If you knew some function or dataset but not sure which package it is in (sometimes there seem to be many possible candidates), input the name in editor or console, press a keyboard shortcut will bring a pop up window to search all names in all installed packages, with your input as search term. You can further search and browse the table, select the one you want then the addin will insert the package prefix or run `library(pkg) in console automatically. 
 
+![name_search](/inst/screenshot/name_search.gif)
+
+_Note: I used keyboard shortcut to bring up the dialog in the gif recording._
+
 Or you can just browse the table to look what's inside every package, compare packages to have a good overview.
+
+![search_symbol](/inst/screenshot/search_symbol.gif)
 
 ## Installation and Usage
 
