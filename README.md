@@ -59,7 +59,7 @@ You can also use the Addin menu `Names - Regex search name` to enable regular ex
 ### build name table
 
 Since the name table shipped with package only include about 300 packages, you should update it to match the packages installed in your environment. 
-- Run `Names - Update name table` to remove name entries not available, add packages not included. Because the updating process may need to load many packages then attempt to unload them, it's strongly recommended to ** always save your import work first, start a new R session** before updating.
+- Run `Names - Update name table` to remove name entries not available, add packages not included. Because the updating process may need to load many packages then attempt to unload them, it's strongly recommended to **always save your import work first, start a new R session** before updating.
 - There could be two type of errors in scanning packages:
   * Packages exist in lib path but cannot be loaded because of installation error. 
   * If too many packages were loaded in scanning, some packages could fail to be loaded because of [maximal number of DLLs reached....](http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r), the 100 limit is definitely low in our scanning. Extra efforts have been taken to make sure each package should be unloaded after scann, but some packages cannot be unloaded normally because of dependency with other packages.
