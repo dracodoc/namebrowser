@@ -73,13 +73,6 @@ searchname <- function() {
       output$table <- DT::renderDataTable(
         init_table(regexmode = input$regex_mode), server = TRUE)
     })
-    # preselect first row after search update
-    shiny::observeEvent(input$table_search, {
-      current_1st <- input$table_rows_current[1]
-      proxy = DT::dataTableProxy('table')
-      DT::selectRows(proxy, current_1st)
-    })
-
     # insert library line, run library in console, replace current line
     shiny::observeEvent(input$load_package, {
       if (!is.null(input$table_rows_selected)) {
