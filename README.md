@@ -1,9 +1,11 @@
 # namebrowser
 RStudio Addin that scan all installed packages for names, search name to insert `library(pkg)` or `pkg::` prefix
 
+![search_normal_prefix](/inst/screenshot/search_normal_prefix.gif)
+
 If you knew some function or dataset but not sure which package it is in (sometimes there seem to be many possible candidates), input the name in editor or console, press a keyboard shortcut will bring a pop up window to search all names in all installed packages, with your input as search term. You can further search and browse the table, select the one you want then the addin will insert the package prefix or run `library(pkg) in console automatically. 
 
-![name_search](/inst/screenshot/name_search.gif)
+![search_regex_lib](/inst/screenshot/search_regex_lib.gif)
 
 _Note: I used keyboard shortcut to bring up the dialog in the gif recording._
 
@@ -58,8 +60,6 @@ After you select a row, either
 - or click `Insert Package Prefix` button at bottom, just insert the full prefixed object name `pkg::name` to replace the input in source editor. This way you don't need to attach the package, and you still can check the help page for the name.
 
 Of course you can just browsing and searching through the name table to see what's available in certain package.
-
-![regex search](/inst/screenshot/regex.png)
 
 ### build name table
 
