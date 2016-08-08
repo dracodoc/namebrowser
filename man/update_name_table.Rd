@@ -33,20 +33,20 @@ with at least one name.
 
 Common usage:
 
-\code{update_name_table()} Use all default parameter, called by Addin menu
-Update name table. Compare package name and version changes to existing name
-table, then update it.
+\code{namebrowser::update_name_table()} Use all default parameter, called by
+Addin menu Update name table. Compare package name and version changes to
+existing name table, then update it.
 
-\code{update_name_table(withVersion = FALSE)} Compare changes by package name
-change only, then update name table.
+\code{namebrowser::update_name_table(withVersion = FALSE)} Compare changes by
+package name change only, then update name table.
 
-\code{update_name_table(startNew = TRUE)} Build name table from scratch,
-ignore existing name table content.
+\code{namebrowser::update_name_table(startNew = TRUE)} Build name table from
+scratch, ignore existing name table content.
 
-\code{update_name_table(tryError = TRUE)} Used to finish unscanned packages
-that failed to load in last scan because of DLL limit error. Must run with
-new R session. May need to run several times to finish all packages that can
-be scanned. There could still be some packages left at last because of
-package installation problems.
+\code{namebrowser::update_name_table(tryError = TRUE)} Used to finish
+unscanned packages that failed to load in last scan because of DLL limit
+error. Must run with new R session. May need to run several times to finish
+all packages that can be scanned. There could still be some packages left at
+last because of package installation problems.
 }
 

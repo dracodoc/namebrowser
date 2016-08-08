@@ -30,7 +30,7 @@ If you feel you don't need all the menu items registered by this Adddin, you can
 - edit `rstudio\addins.dcf` under that folder, remove the sections you don't need.
 - restart R session.
 
-This way they will not appear in the addin menu, but you can still use the feature by running functions in console directly.
+This way they will not appear in the addin menu, but you can still use the feature by running functions in console directly. Get more details of the updating name table from `?namebrowser::update_name_table`.
 
 ### name browser
 
@@ -46,13 +46,13 @@ Note the Addin can pick up the input automatically in these cases, the input don
 - Double click in a word to select that word, or select a word manually. Selected text will be the search input.
 - When the cursor is in the begining, middle and end of a word, the word will be picked up. For example you are inputing a word but not sure about which package it is in, leave the cursor at the end of the word then bring up the Addin.
 
-You can further modify the global search input, or filter the packages in package search box. After you select a row, either 
+You can further modify the global search input, or filter the packages in package search box. Regular expression search mode can be switched on or off with the check box at bottom. Note there is no highlight for some regular expression matches.
+
+After you select a row, either 
 - click `Load Package` to run `library(pkg)` in console, insert `library(pkg)` in previous line, replace the name input in source editor with the name selected. With selected packaged loaded and attached, the usual auto completion and help are all available now.
 - or click `Insert Package Prefix` button at bottom, just insert the full prefixed object name `pkg::name` to replace the input in source editor. This way you don't need to attach the package, and you still can check the help page for the name.
 
 Of course you can just browsing and searching through the name table to see what's available in certain package.
-
-You can also use the Addin menu `Names - Regex search name` to enable regular expression in search. Note regular expression written in source editor probably cannot be picked up automatically like normal mode, better input them in the pop up window. Unlike normal search, there is no highlight for regular expression matches.
 
 ![regex search](/inst/screenshot/regex.png)
 
