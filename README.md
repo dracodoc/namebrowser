@@ -32,6 +32,11 @@ If you feel you don't need all the menu items registered by this Adddin, you can
 
 This way they will not appear in the addin menu, but you can still use the feature by running functions in console directly. Get more details of the updating name table from `?namebrowser::update_name_table`.
 
+### Updates
+2016.08.08  Two improvements thanks to feedbacks and suggestions of @daattali . Check [his great addin of collection of known RStudio addins](https://github.com/daattali/addinslist) out!
+- The addin require newest version `DT` which is only available in github. Now it will be installed automatically by devtools installer.
+- The regular expression search no longer take a separate menu item. There is a check box to switch regular expression mode in the dialog.
+
 ### name browser
 
 You can use the name table shipped with package immediately, input some name in RStudio **source editor** or **console**, click the Addin toolbar button to select `Names - Search name`. 
