@@ -70,8 +70,11 @@ Since the name table shipped with package only include about 300 packages, you s
     
   After several runs, all the packages that left in the error package list are packages with installation problem. There is nothing can do with the Addin itself. You can either uninstall/reinstall them or just leave it as is, it doesn't bother the Addin working or updating except some error messages.
 
+- Sometimes there is this error in updaing name table if many packages were scanned:
 
+        Error in .Call("Crbindlist", l, use.names, fill) : 
+          "Crbindlist" not resolved from current namespace (data.table)
  
-  
+  It looks to be a [`data.table` bug](https://github.com/Rdatatable/data.table/issues/1467). Just restart R session and run updating again solved the problem for me.
   
   
