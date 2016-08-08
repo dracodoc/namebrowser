@@ -27,6 +27,13 @@ You can assign keyboard shortcut to functions:
 - Click Keyboard Shortcuts in left bottom.
 - Click the Shortcut column for each row to assign keyboard shortcut.
 
+If you feel you don't need all the menu items registered by this Adddin, you can prevent some to be registered by RStudio. 
+- find the package installation folder with `devtools::inst("mischelper")`.
+- edit `rstudio\addins.dcf`, remove the sections you don't need.
+- restart R session.
+
+This way they will not appear in the addin menu, but you can still use the feature by running functions in console directly.
+
 ### name browser
 
 You can use the name table shipped with package immediately, input some name in RStudio **source editor** or **console**, click the Addin toolbar button to select `Names - Search name`. 
