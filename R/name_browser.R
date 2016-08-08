@@ -56,19 +56,28 @@ searchname <- function(search_regex = FALSE) {
     gadgetTitleBar(title, right = miniTitleBarButton("load_package",
                                     "Load Package", primary = TRUE)),
     miniContentPanel(DT::dataTableOutput("table", height = "100%")),
-    miniButtonBlock(shiny::actionButton("insert_prefix",
-                            shiny::strong("Insert Package Prefix")))
+    miniButtonBlock(shiny::checkboxInput("regex_mode",
+                      shiny::strong("Regular Expression Search"),
+                      value = FALSE),
+      shiny::actionButton("insert_prefix",
+                          shiny::strong("Insert Package Prefix")))
   )
   # build server -----
   server <- function(input, output, session) {
-    # Define reactive expressions, outputs, etc.
-     dt_nt <- DT::datatable(name_table, selection = "single", filter = 'top',
-                            options = list(searchHighlight = TRUE,
-                                           search = list(search = input_name,
-                                                        regex = search_regex),
-                                           pageLength = 7),
-                            callback = DT::JS("$(table.table().container()).find('input').first().focus();"))
-    output$table <- DT::renderDataTable(dt_nt, server = TRUE)
+    init_table <- function(regexmode){
+      DT::datatable(name_table, selection = "single", filter = 'top',
+                    options = list(searchHighlight = TRUE,
+                                   search = list(search = input_name,
+                                                 regex = regexmode),
+                                   pageLength = 7),
+                    callback = DT::JS("$(table.table().container()).find('input').first().focus();"))
+    }
+    output$table <- DT::renderDataTable(init_table(regexmode = FALSE),
+                                        server = TRUE)
+    shiny::observeEvent(input$regex_mode, {
+      output$table <- DT::renderDataTable(
+        init_table(regexmode = input$regex_mode), server = TRUE)
+    })
     # preselect first row after search update
     shiny::observeEvent(input$table_search, {
       current_1st <- input$table_rows_current[1]
