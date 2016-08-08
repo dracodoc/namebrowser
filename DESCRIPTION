@@ -1,7 +1,7 @@
 Package: namebrowser
 Type: Package
 Title: Search Object Name in All Installed Packages
-Version: 0.1.0
+Version: 0.1.2
 Author: Xianghui Dong
 Maintainer: Xianghui Dong <dracodoc@gmail.com>
 Description: Build object name table from all installed packages. Search names
@@ -17,6 +17,7 @@ Imports:
     data.table,
     shiny,
     miniUI,
-    DT,
-    rstudioapi
+    DT(>= 0.1.67),
+    rstudioapi(>= 0.5)
 RoxygenNote: 5.0.1
+Remotes: rstudio/DT
