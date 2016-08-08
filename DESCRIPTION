@@ -17,5 +17,6 @@ Imports:
     data.table,
     shiny,
     miniUI,
-    DT
+    DT,
+    rstudioapi
 RoxygenNote: 5.0.1
