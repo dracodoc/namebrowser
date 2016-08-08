@@ -72,8 +72,8 @@ Since the name table shipped with package only include about 300 packages, you s
 
 - Sometimes there is this error in updaing name table if many packages were scanned:
 
-                Error in .Call("Crbindlist", l, use.names, fill) : 
-                  "Crbindlist" not resolved from current namespace (data.table)
+        Error in .Call("Crbindlist", l, use.names, fill) : 
+          "Crbindlist" not resolved from current namespace (data.table)
  
   It looks to be a [`data.table` bug](https://github.com/Rdatatable/data.table/issues/1467). Just restart R session and run updating again solved the problem for me.
   
