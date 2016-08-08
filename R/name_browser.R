@@ -9,13 +9,10 @@
 #' replace text selected or name around cursor with selected object name
 #' prefixed by object name.
 #'
-#' @param search_regex Whether to use regular expression in search. Default
-#'   FALSE to use normal search. Dialog title will be updated to show regex
-#'   mode.
 #' @import data.table stringr miniUI
 #' @export
 #'
-searchname <- function(search_regex = FALSE) {
+searchname <- function() {
   data("name_table", package = "namebrowser", envir = environment())
   # get input ----------
   context <- rstudioapi::getActiveDocumentContext()
@@ -49,12 +46,10 @@ searchname <- function(search_regex = FALSE) {
                         NA_to_empty(right_partial_word))
   }
   # build UI ------
-  title <- ifelse(search_regex,
-                  "Regex search name in all packages",
-                  "Search name in all packages")
   ui <- miniPage(
-    gadgetTitleBar(title, right = miniTitleBarButton("load_package",
-                                    "Load Package", primary = TRUE)),
+    gadgetTitleBar("Search name in all packages",
+                   right = miniTitleBarButton("load_package",
+                                              "Load Package", primary = TRUE)),
     miniContentPanel(DT::dataTableOutput("table", height = "100%")),
     miniButtonBlock(shiny::checkboxInput("regex_mode",
                       shiny::strong("Regular Expression Search"),
@@ -123,16 +118,4 @@ searchname <- function(search_regex = FALSE) {
 #'
 NA_to_empty <- function(s){
   ifelse(is.na(s), "", s)
-}
-
-#' Regex seach name in name table
-#'
-#' Helper function to call \code{searchname} with regex enabled.
-#'
-#' Need this because RStudio Addin currently don't support function with
-#' parameters
-#' @export
-#'
-searchname_regex <- function(){
-  searchname(search_regex = TRUE)
 }

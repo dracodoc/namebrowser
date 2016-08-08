@@ -4,12 +4,7 @@
 \alias{searchname}
 \title{Seach name in name table}
 \usage{
-searchname(search_regex = FALSE)
-}
-\arguments{
-\item{search_regex}{Whether to use regular expression in search. Default
-FALSE to use normal search. Dialog title will be updated to show regex
-mode.}
+searchname()
 }
 \description{
 With text selected or name around cursor as initial search term, find the

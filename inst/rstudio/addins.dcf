@@ -7,8 +7,3 @@ Name: Names - Search name
 Description: With text selected or name around cursor as initial search term, find the package and object name you need.
 Binding: searchname
 Interactive: TRUE
-
-Name: Names - Regex search name
-Description: With text selected or name around cursor as initial search term, find the package and object name you need.
-Binding: searchname_regex
-Interactive: TRUE
