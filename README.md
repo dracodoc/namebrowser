@@ -17,8 +17,6 @@ Or you can just browse the table to look what's inside every package, compare pa
 - Run following lines in RStudio console:
 
         install.packages("devtools") 
-        # the CRAN version DT is not compatible with current code
-        devtools::install_github('rstudio/DT')
         devtools::install_github("dracodoc/namebrowser")
 
 You can assign keyboard shortcut to functions:
@@ -61,20 +59,21 @@ You can also use the Addin menu `Names - Regex search name` to enable regular ex
 ### build name table
 
 Since the name table shipped with package only include about 300 packages, you should update it to match the packages installed in your environment. 
-- Run `Names - Update name table` to remove name entries not available, add packages not included. Because the updating process may need to load many packages then attempt to unload them, it's strongly recommended to **save your import work first, start a new R session** for updating.
+- Run `Names - Update name table` to remove name entries not available, add packages not included. Because the updating process may need to load many packages then attempt to unload them, it's strongly recommended to ** always save your import work first, start a new R session** before updating.
 - There could be two type of errors in scanning packages:
   * Packages exist in lib path but cannot be loaded because of installation error. 
   * If too many packages were loaded in scanning, some packages could fail to be loaded because of [maximal number of DLLs reached....](http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r), the 100 limit is definitely low in our scanning. Extra efforts have been taken to make sure each package should be unloaded after scann, but some packages cannot be unloaded normally because of dependency with other packages.
   
-  The scanning process will still update the name table with success results, and save the list of packages that fail to load. You can **start a new R session** (it's a must since the DLL limit has been reached), run `update_name_table(tryError = TRUE)` to process these packages specifically. This time more packages would be scanned successfully, but there could still be some left. Just start a new R session and run `update_name_table(tryError = TRUE)` again. It took 3 runs to process the 400 packages.
+  The scanning process will still update the name table with success results, and save the list of packages that fail to load. You can **start a new R session** (it's a must since the DLL limit has been reached), run `namebrowser::update_name_table(tryError = TRUE)` to process these packages specifically. This time more packages would be scanned successfully, but there could still be some left. Just start a new R session and run `namebrowser::update_name_table(tryError = TRUE)` again. It took 3 runs to process the 400 packages.
     
   After several runs, all the packages that left in the error package list are packages with installation problem. There is nothing can do with the Addin itself. You can either uninstall/reinstall them or just leave it as is, it doesn't bother the Addin working or updating except some error messages.
 
-- Sometimes there is this error in updaing name table if many packages were scanned:
+- Sometimes there is this error in updaing name table if many packages were scanned without restarting R session first:
 
         Error in .Call("Crbindlist", l, use.names, fill) : 
           "Crbindlist" not resolved from current namespace (data.table)
  
-  It looks to be a [`data.table` bug](https://github.com/Rdatatable/data.table/issues/1467). Just restart R session and run updating again solved the problem for me.
+  It looks to be a [`data.table` bug](https://github.com/Rdatatable/data.table/issues/1467) which can be avoided by restarting an new R session. 
+  However our last scan updated the package name list already, even if the name table was not updated because of the bug. Thus just restarting an new R session and updating name table again will not actually update the table. In this case you need to restart an new R session, run `namebrowser::update_name_table(startNew = TRUE)` to build name table from scratch. The help page of `namebrowser::update_name_table` have more details on different parameter options available.
   
   
