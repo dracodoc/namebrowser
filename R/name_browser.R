@@ -52,10 +52,10 @@ searchname <- function() {
                                               "Load Package", primary = TRUE)),
     miniContentPanel(DT::dataTableOutput("table", height = "100%")),
     miniButtonBlock(shiny::checkboxInput("regex_mode",
-                      shiny::strong("Regular Expression Search"),
-                      value = FALSE),
-      shiny::actionButton("insert_prefix",
-                          shiny::strong("Insert Package Prefix")))
+                                         shiny::strong("Regular Expression Search"),
+                                         value = FALSE),
+                    shiny::actionButton("insert_prefix",
+                                        shiny::strong("Insert Package Prefix")))
   )
   # build server -----
   server <- function(input, output, session) {
