@@ -1,8 +1,3 @@
-Name: Names - Update name table
-Description: Sync name table with package changes.
-Binding: update_name_table
-Interactive: FALSE
-
 Name: Names - Search name
 Description: With text selected or name around cursor as initial search term, find the package and object name you need.
 Binding: searchname

@@ -1,84 +1,61 @@
-# namebrowser
-RStudio Addin that scan all installed packages for names, search name to insert `library(pkg)` or `pkg::` prefix
+# namebrowser: RStudio Addin that search name in all installed packages
+
+- Input or select (higlight or place cursor around) a name (including function, dataset etc) in editor or console, press a keyboard shortcut or click addin menu.
+- A pop up window will search your input in all installed packages. Search, filter, sort to find the name you want, select the row, then you can choose to either
+  + replace the word input with `pkg::name` format. This is good for one time use or interactive running in console. With the package name prefixed, you can search help on name with `F1` in RStudio too.
 
 ![search_normal_prefix](/inst/screenshot/search_normal_prefix.gif)
 
-If you knew some function or dataset but not sure which package it is in (sometimes there seem to be many possible candidates), input the name in editor or console, press a keyboard shortcut will bring a pop up window to search all names in all installed packages, with your input as search term. You can further search and browse the table, select the one you want then the addin will insert the package prefix or run `library(pkg) in console automatically. 
+  + or insert `library(pkg)` in previous line, also run `library(pkg)` in console.
 
 ![search_regex_lib](/inst/screenshot/search_regex_lib.gif)
 
-_Note: I used keyboard shortcut to bring up the dialog in the gif recording._
-
-Or you can just browse the table to look what's inside every package, compare packages to have a good overview.
+- Or you can just browse the table to look what's inside every package, compare packages to have a good overview.
 
 ![search_symbol](/inst/screenshot/search_symbol.gif)
 
-## Installation and Usage
+## Installation
 
 - Install RStudio newest release version.
-- Run following lines in RStudio console:
+- Run following in RStudio console:
 
         install.packages("devtools") 
         devtools::install_github("dracodoc/namebrowser")
 
-You can assign keyboard shortcut to functions:
+You can assign keyboard shortcut to addins:
 
 - Select Browse Addins from the Addin toolbar button.
+![Addin toolbar](/inst/screenshot/addin_toolbar.png)
+
 - Click Keyboard Shortcuts in left bottom.
-- Click the Shortcut column for each row to assign keyboard shortcut.
+- Click the Shortcut column for addin row to assign keyboard shortcut.
 
-If you feel you don't need all the menu items registered by this Adddin, you can prevent some to be registered by RStudio. 
-- find the package installation folder with `find.package("namebrowser")`.
-- edit `rstudio\addins.dcf` under that folder, remove the sections you don't need.
-- restart R session.
+### Addin updates
+#### 2016.08.09  
+Removed the function of `update name table` from addin menu to reduce clutter or accidental click. This function is recommended to always be used in a new R session. See below for detailed usage information.
 
-This way they will not appear in the addin menu, but you can still use the feature by running functions in console directly. Get more details of the updating name table from `?namebrowser::update_name_table`.
-
-### Updates
-2016.08.08  Two improvements thanks to feedbacks and suggestions of @daattali . Check [his great addin of collection of known RStudio addins](https://github.com/daattali/addinslist) out!
+#### 2016.08.08  
+Two improvements thanks to feedbacks and suggestions of @daattali . Be sure to check [his great addin of collection of known RStudio addins](https://github.com/daattali/addinslist)!
 - The addin require newest version `DT` which is only available in github. Now it will be installed automatically by devtools installer.
 - The regular expression search no longer take a separate menu item. There is a check box to switch regular expression mode in the dialog.
 
-### name browser
+## Update name table
 
-You can use the name table shipped with package immediately, input some name in RStudio **source editor** or **console**, click the Addin toolbar button to select `Names - Search name`. 
+The name table shipped with package included about 300 packages so you can start to use immediately. You can update it to match your installed packages. 
 
-![Addin toolbar](/inst/screenshot/addin_toolbar.png)
+- Save your important work. **Start a new R session** through RStudio menu `Session - Restart R` or `Ctrl+Shift+F10`. 
+- Run `namebrowser::update_name_table()` in console to remove packages not installed locally from the name table, add packages not included before.
 
-A pop up window will list all the names in the table with your input as search condition.
-
-![pop up window](/inst/screenshot/browser.png)
-
-Note the Addin can pick up the input automatically in these cases, the input don't have to be a complete word:
-- Double click in a word to select that word, or select a word manually. Selected text will be the search input.
-- When the cursor is in the begining, middle and end of a word, the word will be picked up. For example you are inputing a word but not sure about which package it is in, leave the cursor at the end of the word then bring up the Addin.
-
-You can further modify the global search input, or filter the packages in package search box. Regular expression search mode can be switched on or off with the check box at bottom. Note there is no highlight for some regular expression matches.
-
-After you select a row, either 
-- click `Load Package` to run `library(pkg)` in console, insert `library(pkg)` in previous line, replace the name input in source editor with the name selected. With selected packaged loaded and attached, the usual auto completion and help are all available now.
-- or click `Insert Package Prefix` button at bottom, just insert the full prefixed object name `pkg::name` to replace the input in source editor. This way you don't need to attach the package, and you still can check the help page for the name.
-
-Of course you can just browsing and searching through the name table to see what's available in certain package.
-
-### build name table
-
-Since the name table shipped with package only include about 300 packages, you should update it to match the packages installed in your environment. 
-- Run `Names - Update name table` to remove name entries not available, add packages not included. Because the updating process may need to load many packages then attempt to unload them, it's strongly recommended to **always save your import work first, start a new R session** before updating.
-- There could be two type of errors in scanning packages:
-  * Packages exist in lib path but cannot be loaded because of installation error. 
-  * If too many packages were loaded in scanning, some packages could fail to be loaded because of [maximal number of DLLs reached....](http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r), the 100 limit is definitely low in our scanning. Extra efforts have been taken to make sure each package should be unloaded after scann, but some packages cannot be unloaded normally because of dependency with other packages.
-  
-  The scanning process will still update the name table with success results, and save the list of packages that fail to load. You can **start a new R session** (it's a must since the DLL limit has been reached), run `namebrowser::update_name_table(tryError = TRUE)` to process these packages specifically. This time more packages would be scanned successfully, but there could still be some left. Just start a new R session and run `namebrowser::update_name_table(tryError = TRUE)` again. It took 3 runs to process the 400 packages.
-    
-  After several runs, all the packages that left in the error package list are packages with installation problem. There is nothing can do with the Addin itself. You can either uninstall/reinstall them or just leave it as is, it doesn't bother the Addin working or updating except some error messages.
-
-- Sometimes there is this error in updaing name table if many packages were scanned without restarting R session first:
+- There could be 3 type of errors in scanning packages, most of them can be solved with a new R session. After scanning, it's almost always better to start a new R session before your work.
+  * Packages exist in lib path but cannot be loaded because of installation error. There is nothing can do with the addin itself. You can either uninstall/reinstall them or just leave it as is, it doesn't bother the addin working or updating except some error messages.
+  * If too many packages were loaded in scanning, some packages could fail to be loaded because of [maximal number of DLLs reached....](http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r).
+  The addin have to load a package first to scan names inside, although extra efforts have been made to unload package after scan, there could be still some packages failed to unload because of dependency with other loaded packages. In one scan of several hundreds of packages, the packages failed to unload could exceed the 100 DLL limit, thus some new packages need those DLL cannot be loaded and scanned.
+  The scanning process will still update the name table with success results, and save the list of packages that fail to load. You can **start a new R session** (it's a must since the DLL limit has been reached), run `namebrowser::update_name_table(tryError = TRUE)` to process these packages specifically. This time more packages would be scanned successfully, rinse and repeat. It took me 3 runs to scan 400 packages.
+  After several runs, all the packages failed to load because of DLL limit error are scanned, but there could be some packages left because of installation problem. 
+ * Sometimes there is this error in updaing name table if many packages were scanned without restarting R session first:
 
         Error in .Call("Crbindlist", l, use.names, fill) : 
           "Crbindlist" not resolved from current namespace (data.table)
  
-  It looks to be a [`data.table` bug](https://github.com/Rdatatable/data.table/issues/1467) which can be avoided by restarting an new R session. 
-  However our last scan updated the package name list already, even if the name table was not updated because of the bug. Thus just restarting an new R session and updating name table again will not actually update the table. In this case you need to restart an new R session, run `namebrowser::update_name_table(startNew = TRUE)` to build name table from scratch. The help page of `namebrowser::update_name_table` have more details on different parameter options available.
-  
-  
+  It looks to be a [`data.table` bug](https://github.com/Rdatatable/data.table/issues/1467) which can be avoided by restarting a new R session.However our last scan updated the package name list already, even if the name table was not updated because of the bug. Thus just restarting a new R session and updating name table again will not actually update the table.
+  In this case you need to **start a new R session**, run `namebrowser::update_name_table(startNew = TRUE)` to build name table from scratch. The help of `?namebrowser::update_name_table` have more details on parameter options.

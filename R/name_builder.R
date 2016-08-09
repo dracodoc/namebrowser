@@ -28,7 +28,6 @@ get_data_folder <- function(){
 #'
 #' @return list(pkg_to_add, pkg_to_remove)
 #' @import stringr
-#' @export
 #'
 pkg_name_changed <- function(startNew = FALSE){
   if (identical(startNew, TRUE)) {
@@ -75,7 +74,6 @@ pkg_name_changed <- function(startNew = FALSE){
 #'
 #' @return list(pkg_to_add, pkg_to_remove)
 #' @import data.table stringr
-#' @export
 #'
 pkg_name_version_changed <- function(startNew = FALSE){
   if (startNew) {
@@ -208,7 +206,6 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
 #' Print summary of Name table
 #'
 #' @param nt name table to be summarized
-#' @export
 #'
 summary_name_table <- function(table_title, nt){
   println(table_title, "\n",
@@ -218,7 +215,6 @@ summary_name_table <- function(table_title, nt){
 #' Helper method to print console message with default new line
 #'
 #' @param ... send to paste0
-#' @export
 #'
 println <- function(...){
   cat(paste0(..., "\n"))
