@@ -1,4 +1,4 @@
-# namebrowser: RStudio Addin that search name in all installed packages
+# namebrowser: RStudio addin that search name in all installed packages
 
 - Input or select (higlight or place cursor around) a name (including function, dataset etc) in editor or console, press a keyboard shortcut or click addin menu.
 - A pop up window will search your input in all installed packages. Search, filter, sort to find the name you want, select the row, then you can choose to either
@@ -46,16 +46,24 @@ The name table shipped with package included about 300 packages so you can start
 - Save your important work. **Start a new R session** through RStudio menu `Session - Restart R` or `Ctrl+Shift+F10`. 
 - Run `namebrowser::update_name_table()` in console to remove packages not installed locally from the name table, add packages not included before.
 
-- There could be 3 type of errors in scanning packages, most of them can be solved with a new R session. After scanning, it's almost always better to start a new R session before your work.
-  * Packages exist in lib path but cannot be loaded because of installation error. There is nothing can do with the addin itself. You can either uninstall/reinstall them or just leave it as is, it doesn't bother the addin working or updating except some error messages.
-  * If too many packages were loaded in scanning, some packages could fail to be loaded because of [maximal number of DLLs reached....](http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r).
-  The addin have to load a package first to scan names inside, although extra efforts have been made to unload package after scan, there could be still some packages failed to unload because of dependency with other loaded packages. In one scan of several hundreds of packages, the packages failed to unload could exceed the 100 DLL limit, thus some new packages need those DLL cannot be loaded and scanned.
-  The scanning process will still update the name table with success results, and save the list of packages that fail to load. You can **start a new R session** (it's a must since the DLL limit has been reached), run `namebrowser::update_name_table(tryError = TRUE)` to process these packages specifically. This time more packages would be scanned successfully, rinse and repeat. It took me 3 runs to scan 400 packages.
-  After several runs, all the packages failed to load because of DLL limit error are scanned, but there could be some packages left because of installation problem. 
- * Sometimes there is this error in updaing name table if many packages were scanned without restarting R session first:
+There could be 3 type of errors in scanning packages, most of them can be solved with a new R session. After scanning, it's almost always better to start a new R session before your work.
 
+  - Packages exist in lib path but cannot be loaded because of installation error. There is nothing can do with the addin itself. You can either uninstall/reinstall them or just leave it as is, it doesn't bother the addin working or updating except some error messages.
+  - If too many packages were loaded in scanning, some packages could fail to be loaded because of [maximal number of DLLs reached](http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r).
+
+    The addin have to load a package first to scan names inside, although extra efforts have been made to unload package after scan, there could be still some packages failed to unload because of dependency with other loaded packages. In one scan of several hundreds of packages, the packages failed to unload could exceed the 100 DLL limit, thus some new packages need those DLL cannot be loaded and scanned.
+
+    The scanning process will still update the name table with success results, and save the list of packages that fail to load. You can **start a new R session** (it's a must since the DLL limit has been reached), run `namebrowser::update_name_table(tryError = TRUE)` to process these packages specifically. This time more packages would be scanned successfully, rinse and repeat. It took me 3 runs to scan 400 packages.
+
+    After several runs, all the packages failed to load because of DLL limit error are scanned, but there could be some packages left because of installation problem. 
+      
+  - Sometimes there is this error in updaing name table if many packages were scanned without restarting R session first:
+  
         Error in .Call("Crbindlist", l, use.names, fill) : 
           "Crbindlist" not resolved from current namespace (data.table)
- 
-  It looks to be a [`data.table` bug](https://github.com/Rdatatable/data.table/issues/1467) which can be avoided by restarting a new R session.However our last scan updated the package name list already, even if the name table was not updated because of the bug. Thus just restarting a new R session and updating name table again will not actually update the table.
+  
+  This seemed to be a [`data.table` bug](https://github.com/Rdatatable/data.table/issues/1467) which can be avoided by restarting a new R session.
+
+  However our last scan updated the package name list already, even if the name table was not updated because of the bug. Thus just restarting a new R session and updating name table again will not actually update the table.
+  
   In this case you need to **start a new R session**, run `namebrowser::update_name_table(startNew = TRUE)` to build name table from scratch. The help of `?namebrowser::update_name_table` have more details on parameter options.
