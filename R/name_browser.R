@@ -14,6 +14,8 @@
 #'
 searchname <- function() {
   data("name_table", package = "namebrowser", envir = environment())
+  # print database summary for comparison, seemed to be slow in startup? diabled
+  # summary_name_table("Current name table: ", name_table)
   # get input ----------
   context <- rstudioapi::getActiveDocumentContext()
   selection_start <- context$selection[[1]]$range$start
@@ -64,7 +66,7 @@ searchname <- function() {
                     options = list(searchHighlight = TRUE,
                                    search = list(search = input_name,
                                                  regex = regexmode),
-                                   pageLength = 7),
+                                   pageLength = 7, dom = "lftpr"),
                     callback = DT::JS("$(table.table().container()).find('input').first().focus();"))
     }
     output$table <- DT::renderDataTable(init_table(regexmode = FALSE),
