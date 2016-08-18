@@ -49,15 +49,16 @@ searchname <- function() {
   }
   # build UI ------
   ui <- miniPage(
+    shinyjs::useShinyjs(),
     gadgetTitleBar("Search name in all packages",
-                   right = miniTitleBarButton("load_package",
-                                              "Load Package", primary = TRUE)),
+                   right = shinyjs::disabled(miniTitleBarButton("load_package",
+                                              "Load Package", primary = TRUE))),
     miniContentPanel(DT::dataTableOutput("table", height = "100%")),
     miniButtonBlock(shiny::checkboxInput("regex_mode",
                                          shiny::strong("Regular Expression Search"),
                                          value = FALSE),
-                    shiny::actionButton("insert_prefix",
-                                        shiny::strong("Insert Package Prefix")))
+                    shinyjs::disabled(shiny::actionButton("insert_prefix",
+                                        shiny::strong("Insert Package Prefix"))))
   )
   # build server -----
   server <- function(input, output, session) {
@@ -71,6 +72,10 @@ searchname <- function() {
     }
     output$table <- DT::renderDataTable(init_table(regexmode = FALSE),
                                         server = TRUE)
+    shiny::observeEvent(input$table_rows_selected, {
+      shinyjs::toggleState(id = "load_package", condition = length(input$table_rows_selected) != 0)
+      shinyjs::toggleState(id = "insert_prefix", condition = length(input$table_rows_selected) != 0)
+    })
     shiny::observeEvent(input$regex_mode, {
       output$table <- DT::renderDataTable(
         init_table(regexmode = input$regex_mode), server = TRUE)

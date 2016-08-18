@@ -18,6 +18,7 @@ Imports:
     shiny,
     miniUI,
     DT(>= 0.1.67),
-    rstudioapi(>= 0.5)
+    rstudioapi(>= 0.5),
+    shinyjs
 RoxygenNote: 5.0.1
 Remotes: rstudio/DT
