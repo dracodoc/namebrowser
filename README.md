@@ -31,6 +31,10 @@ You can assign keyboard shortcut to addins:
 - Click the Shortcut column for addin row to assign keyboard shortcut.
 
 ### Addin updates
+#### 2016.08.18
+Per suggestions from @daattali :
+- table summary is removed to reduce clutter in UI. User can get table summary information in updating name table.
+- `Load Package` and `Insert Package Prefix` button are disable at first, then enabled after some row was selected.
 #### 2016.08.09  
 Removed the function of `update name table` from addin menu to reduce clutter or accidental click. This function is recommended to always be used in a new R session. See below for detailed usage information.
 
