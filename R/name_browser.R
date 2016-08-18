@@ -73,7 +73,6 @@ searchname <- function() {
     output$table <- DT::renderDataTable(init_table(regexmode = FALSE),
                                         server = TRUE)
     shiny::observeEvent(input$table_rows_selected, {
-      browser()
       shinyjs::toggleState(id = "load_package", condition = length(input$table_rows_selected) != 0)
       shinyjs::toggleState(id = "insert_prefix", condition = length(input$table_rows_selected) != 0)
     })
@@ -109,8 +108,8 @@ searchname <- function() {
       }
     })
   }
-  shiny::runGadget(ui, server, viewer = shiny::paneViewer()) # shiny::dialogViewer("Name browser",
-  #height = 650)
+  shiny::runGadget(ui, server, viewer = shiny::dialogViewer("Name browser",
+                                                            height = 650))
 }
 
 #' Convert NAs to ""
