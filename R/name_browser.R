@@ -73,9 +73,9 @@ searchname <- function() {
     output$table <- DT::renderDataTable(init_table(regexmode = FALSE),
                                         server = TRUE)
     shiny::observeEvent(input$table_rows_selected, {
-      shinyjs::toggleState(id = "load_package", condition = length(input$table_rows_selected) != 0)
-      shinyjs::toggleState(id = "insert_prefix", condition = length(input$table_rows_selected) != 0)
-    })
+      shinyjs::toggleState(id = "load_package", condition = !is.null(input$table_rows_selected))
+      shinyjs::toggleState(id = "insert_prefix", condition = !is.null(input$table_rows_selected))
+    }, ignoreNULL = FALSE)
     shiny::observeEvent(input$regex_mode, {
       output$table <- DT::renderDataTable(
         init_table(regexmode = input$regex_mode), server = TRUE)
