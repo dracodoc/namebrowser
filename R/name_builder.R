@@ -10,7 +10,7 @@ get_data_folder <- function(){
   # devtools version need extra dll, when too many lib loading error happened, this cannot run, further prevent data to be saved, use base version instead.
   # package_folder <- "d:\\Work\\R\\namebrowser\\"
   package_folder <- find.package("namebrowser")
-  data_folder <- str_c(package_folder, "/data/")
+  data_folder <- file.path(package_folder, "data")
 }
 
 #' Scan package changes by name only
@@ -34,7 +34,7 @@ pkg_name_changed <- function(startNew = FALSE){
     pkg_list <- .packages(all.available = TRUE)
     pkg_to_add <- pkg_list
     pkg_to_remove <- NULL
-    save(pkg_list, file = str_c(get_data_folder(), "pkg_list.rda"))
+    save(pkg_list, file = file.path(get_data_folder(), "pkg_list.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   } else if (identical(startNew, FALSE)) {
     data("pkg_list", package = "namebrowser", envir = environment())
@@ -52,7 +52,7 @@ pkg_name_changed <- function(startNew = FALSE){
     print(pkg_to_remove)
     #sync name list  to current version, use change list to sync names too
     pkg_list <- pkg_list_now
-    save(pkg_list, file = str_c(get_data_folder(), "pkg_list.rda"))
+    save(pkg_list, file = file.path(get_data_folder(), "pkg_list.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   }
 }
@@ -82,7 +82,7 @@ pkg_name_version_changed <- function(startNew = FALSE){
     setkey(pkg_table, Package, Version)
     pkg_to_add <- pkg_table[, Package]
     pkg_to_remove <- NULL
-    save(pkg_table, file = str_c(get_data_folder(), "pkg_table.rda"))
+    save(pkg_table, file = file.path(get_data_folder(), "pkg_table.rda"))
     list("pkg_to_add" = pkg_to_add, "pkg_to_remove" = pkg_to_remove)
   } else{
     data("pkg_table", package = "namebrowser", envir = environment())
@@ -105,7 +105,7 @@ pkg_name_version_changed <- function(startNew = FALSE){
     print(pkg_to_remove_nv)
     #sync pkg table  to current version ------
     pkg_table <- pkg_table_now
-    save(pkg_table, file = str_c(get_data_folder(), "pkg_table.rda"))
+    save(pkg_table, file = file.path(get_data_folder(), "pkg_table.rda"))
     list("pkg_to_add" = pkg_to_add_nv[, Package],
          "pkg_to_remove" = pkg_to_remove_nv[, Package])
   }
@@ -200,7 +200,7 @@ update_name_table <- function(withVersion = TRUE, startNew = FALSE, tryError = F
   setkey(name_table, package, obj_name)
   summary_name_table("-- Final updated Name table:", name_table)
   println("-- See more options of updating name table in ?namebrowser::update_name_table")
-  save(name_table, file = str_c(get_data_folder(), "name_table.rda"))
+  save(name_table, file = file.path(get_data_folder(), "name_table.rda"))
 }
 
 #' Print summary of Name table
@@ -272,7 +272,7 @@ scan_names <- function(package_list){
     print(error_packages)
     println(">> If some packages cannot be loaded with error 'maximal number of DLLs reached...', it's because too many packages were loaded in scan but cannot be unloaded for dependency reason. The DLL limit is 100 according to http://stackoverflow.com/questions/24832030/exceeded-maximum-number-of-dlls-in-r\n>> Start a new R session, use namebrowser::update_name_table(tryError = TRUE) to scan them again. Every new scan will reduce error packages a little bit.\n>> After several runs, there could be still some error packages that were not installed properly thus cannot be loaded or scanned.\n-----------------------\n")
   }
-  save(error_packages, file = str_c(get_data_folder(), "error_packages.rda"))
+  save(error_packages, file = file.path(get_data_folder(), "error_packages.rda"))
   # convert nested name list into data table ------
   name_table_list <- vector("list", length(name_list))
   for (i in seq_along(name_list)) {
